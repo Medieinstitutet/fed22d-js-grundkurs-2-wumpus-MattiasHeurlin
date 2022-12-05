@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "nothing-works-and-i-hate-my-life": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "npx prettier --write ."
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

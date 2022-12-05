@@ -1,0 +1,58 @@
+body {
+  font-family: 'Press Start 2P', cursive;
+  color: #e806cb;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(100%);
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+main {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url('vendor/images/mainpic7.png');
+  background-position: center;
+  background-size: 120%; // TODO: Ska zooma in vid start
+  background-repeat: no-repeat;
+  background-color: black;
+  display: grid;
+  place-content: center;
+  z-index: 5; // FIXME: Funkar inte som den ska
+}
+#startBtn {
+  position: absolute;
+  right: 20%;
+  bottom: 30%;
+  width: 80px;
+  height: 80px;
+  border-radius: 100%;
+  background-color: red;
+  border: 1px solid darkred;
+  box-shadow: 0 0 15px 5px rgb(255, 14, 1);
+  cursor: pointer;
+}
+#userTextInput {
+  margin-top: 10px;
+  background-color: #431c53;
+  padding: 5px;
+  color: #e806cb;
+}
+section {
+  width: 620px; // TODO: Responsivitet vid olika skärmar
+  height: 480px;
+  padding: 8%;
+  background-color: #57266d;
+  border-radius: 90px;
+  z-index: 0;
+  border: 3px solid #431c53;
+}
