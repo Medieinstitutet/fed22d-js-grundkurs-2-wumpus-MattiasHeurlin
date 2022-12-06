@@ -1,51 +1,90 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import './style/style.scss';
 
-const mainStage: object = document.querySelector('#mainStage');
-const mainTextArea: object = document.querySelector('#mainTextArea');
-const userTextInput: object = document.querySelector('#userTextInput');
-document.querySelector('#startBtn')?.addEventListener('click', startGame);
+const mainStage = document.querySelector('#mainStage') as HTMLElement;
+const mainTextArea = document.querySelector('#mainTextArea') as HTMLElement;
+const userTextInput = document.querySelector('#userTextInput') as HTMLInputElement;
 let userName = '';
-console.log(userTextInput);
 let currentInstance = 0;
 let wumpusCurrentLocation: any;
 
 interface CaveRooms {
   wumpusIsHere: boolean;
-  containsItem: Array<string>;
+  containsItem: string[];
   containsTrap: boolean;
   containsBat: boolean;
 }
 
-let allCaves: CaveRooms = [
-  [
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
+const allCaves /*: CaveRooms - Ger många errors FIXME: */ = [
+  [ // Tar upp mycket plats, men eslint vill att man skriver såhär
+    {
+      wumpusIsHere: false, containsItem: [''], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
   ],
   [
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
   ],
   [
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
   ],
   [
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
   ],
   [
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-    { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
+    {
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
+    },
   ],
 ];
 
@@ -54,8 +93,8 @@ function getRandomInt(max: number): number {
 }
 
 function placeWumpus(): void {
-  let random1: number = getRandomInt(4);
-  let random2: number = getRandomInt(3);
+  const random1: number = getRandomInt(4);
+  const random2: number = getRandomInt(3);
   allCaves[random1][random2].wumpusIsHere = true;
   wumpusCurrentLocation = `Wumpus location: ${random1}, ${random2}`;
   console.log(wumpusCurrentLocation);
@@ -63,13 +102,13 @@ function placeWumpus(): void {
 function placeTraps(): void {
   for (let i = 0; i < 5; i++) {
     allCaves[getRandomInt(4)][getRandomInt(3)].containsTrap = true;
-    console.log('Trap has been placed ' + i);
+    console.log(`Traps have been placed: ${i}`);
   }
 }
 function placeBats(): void {
   for (let i = 0; i < 5; i++) {
-    allCaves[getRandomInt(4)][getRandomInt(3)].containsbat = true;
-    console.log('Bat has been placed ' + i);
+    allCaves[getRandomInt(4)][getRandomInt(3)].containsBat = true;
+    console.log(`Bats have been placed: ${i}`);
   }
 }
 
@@ -80,7 +119,7 @@ function cavesPlaceEverything(): void {
 }
 
 function nextInstance(): void {
-  if (currentInstance == 1) {
+  if (currentInstance === 1) {
     mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
     castle of Greveholm. 
     Afraid to be alone? Lucky for you, you are not. There is also a beast by the name of Wumpus in the
@@ -92,7 +131,7 @@ function nextInstance(): void {
 function startGame(): void {
   mainTextArea.innerHTML = 'Great! What would you like your character to be called? <br> Press "Enter" to continue';
   userTextInput.classList.toggle('hidden');
-  userTextInput.addEventListener('keypress', e => {
+  userTextInput.addEventListener('keypress', (e) => {
     userName = userTextInput.value; // TODO: Fixa max antal tecken
     if (e.key === 'Enter') {
       userTextInput.value = '';
@@ -102,6 +141,7 @@ function startGame(): void {
     }
   });
 }
-cavesPlaceEverything();
+document.querySelector('#startBtn')?.addEventListener('click', startGame);
 
+cavesPlaceEverything();
 console.table(allCaves);
