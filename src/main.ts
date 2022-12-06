@@ -18,7 +18,7 @@ interface CaveRooms {
 const allCaves /*: CaveRooms - Ger många errors FIXME: */ = [
   [ // Tar upp mycket plats, men eslint vill att man skriver såhär
     {
-      wumpusIsHere: false, containsItem: [''], containsTrap: false, containsBat: false,
+      wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
     },
     {
       wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false,
@@ -92,30 +92,42 @@ function getRandomInt(max: number): number {
   return Math.floor(Math.random() * max);
 }
 
-function placeWumpus(): void {
-  const random1: number = getRandomInt(4);
-  const random2: number = getRandomInt(3);
-  allCaves[random1][random2].wumpusIsHere = true;
-  wumpusCurrentLocation = `Wumpus location: ${random1}, ${random2}`;
-  console.log(wumpusCurrentLocation);
-}
+
 function placeTraps(): void {
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 4; i++) {
     allCaves[getRandomInt(4)][getRandomInt(3)].containsTrap = true;
     console.log(`Traps have been placed: ${i}`);
   }
 }
 function placeBats(): void {
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
+    let random1: number = getRandomInt(4);
+    let random2: number = getRandomInt(3);
+    while (allCaves[random1][random2].containsTrap) {
+      random1 = getRandomInt(4);
+      random2 = getRandomInt(3);
+    }
     allCaves[getRandomInt(4)][getRandomInt(3)].containsBat = true;
     console.log(`Bats have been placed: ${i}`);
   }
 }
 
-function cavesPlaceEverything(): void {
-  placeWumpus();
+function placeWumpus(): void {
+  let random1: number = getRandomInt(4);
+  let random2: number = getRandomInt(3);
+  while (allCaves[random1][random2].containsTrap || allCaves[random1][random2].containsBat) {
+    random1 = getRandomInt(4);
+    random2 = getRandomInt(3);
+  }
+  allCaves[random1][random2].wumpusIsHere = true;
+  wumpusCurrentLocation = `Wumpus location: ${random1}, ${random2}`;
+  console.log(wumpusCurrentLocation);
+}
+
+function cavesPlaceEverything(): void { 
   placeTraps();
   placeBats();
+  placeWumpus();
 }
 
 function nextInstance(): void {
@@ -123,7 +135,7 @@ function nextInstance(): void {
     mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
     castle of Greveholm. 
     Afraid to be alone? Lucky for you, you are not. There is also a beast by the name of Wumpus in the
-    treturous cave system. Your goal is the slay Wumpus before he kills you. There is loot you can find along 
+    treturous cave system. Your goal is to slay Wumpus before he kills you. There is loot you can find along 
     the way to aid you, if you find it. Currently you only have a bow and two arrows.`;
   }
 }
