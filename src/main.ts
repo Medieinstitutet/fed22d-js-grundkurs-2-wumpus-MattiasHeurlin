@@ -20,66 +20,56 @@ let allCaves: CaveRooms = [
   [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-  ],
-  [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
   ],
   [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-  ],
-  [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
   ],
   [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-  ],
-  [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
   ],
   [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-  ],
-  [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
   ],
   [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
-  ],
-  [
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
     { wumpusIsHere: false, containsItem: [], containsTrap: false, containsBat: false },
   ],
 ];
 
-function getRandomInt(max:number): number {
+function getRandomInt(max: number): number {
   return Math.floor(Math.random() * max);
 }
 
 function placeWumpus(): void {
   let random1: number = getRandomInt(4);
   let random2: number = getRandomInt(3);
-  allCaves[random1, random2].wumpusIsHere = true;
+  allCaves[random1][random2].wumpusIsHere = true;
   wumpusCurrentLocation = `Wumpus location: ${random1}, ${random2}`;
   console.log(wumpusCurrentLocation);
 }
 function placeTraps(): void {
-  for (let i = 0; i < 5;i++) {
-    allCaves[getRandomInt(4), getRandomInt(3)].containsTrap = true;
-    console.log('Trap has been placed ' + i)
+  for (let i = 0; i < 5; i++) {
+    allCaves[getRandomInt(4)][getRandomInt(3)].containsTrap = true;
+    console.log('Trap has been placed ' + i);
   }
 }
 function placeBats(): void {
-  for (let i = 0; i < 5;i++) {
-    allCaves[getRandomInt(4), getRandomInt(3)].containsbat = true;
-    console.log('Bat has been placed ' + i)
+  for (let i = 0; i < 5; i++) {
+    allCaves[getRandomInt(4)][getRandomInt(3)].containsbat = true;
+    console.log('Bat has been placed ' + i);
   }
 }
 
