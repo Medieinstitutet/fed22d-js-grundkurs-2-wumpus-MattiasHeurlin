@@ -42,12 +42,15 @@ main {
   cursor: pointer;
 }
 #userTextInput {
-  margin-top: 10px;
-  background-color: #431c53;
+  margin-top: 20px;
+  background-color: #2d1039;
   padding: 5px;
   color: #e806cb;
+  width: 200px;
+  height: 40px;
 }
 section {
+  position: relative;
   width: 620px; // TODO: Responsivitet vid olika skärmar
   height: 480px;
   padding: 8%;
