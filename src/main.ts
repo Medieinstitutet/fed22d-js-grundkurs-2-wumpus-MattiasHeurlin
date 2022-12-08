@@ -160,8 +160,15 @@ function getRandomInt(max: number): number {
 
 function placeTraps(): void {
   for (let i = 0; i < 4; i++) {
-    allCaves[getRandomInt(3)][getRandomInt(4)].containsTrap = true;
-    console.log(`Traps have been placed: ${i}`);
+    let random1: number = getRandomInt(3);
+    let random2: number = getRandomInt(4);
+    console.log(random1 + ' ' + random2);
+    while (random1 === 0 && random2 === 0) {
+      random1 = getRandomInt(3);
+      random2 = getRandomInt(4);
+    }
+    allCaves[random1][random2].containsTrap = true;
+    console.log(`Traps have been placed: ${random1} ${random2}`);
   }
 }
 
@@ -169,10 +176,9 @@ function placeBats(): void {
   for (let i = 0; i < 6; i++) {
     let random1: number = getRandomInt(3);
     let random2: number = getRandomInt(4);
-    while (allCaves[random1][random2].containsTrap) {
+    while (random1 === 0 && random2 === 0) {
       random1 = getRandomInt(3);
       random2 = getRandomInt(4);
-      console.log('While loop has been triggerd');
     }
     allCaves[random1][random2].containsBat = true;
     console.log(`Bats have been placed: ${i}`);
@@ -182,10 +188,13 @@ function placeBats(): void {
 function placeWumpus(): void {
   let random1: number = getRandomInt(3);
   let random2: number = getRandomInt(4);
-  while (allCaves[random1][random2].containsTrap || allCaves[random1][random2].containsBat) {
+  while (
+    allCaves[random1][random2].containsTrap ||
+    allCaves[random1][random2].containsBat ||
+    (random1 === 0 && random2 === 0)
+  ) {
     random1 = getRandomInt(3);
     random2 = getRandomInt(4);
-    console.log(`Wumpus While loop has been triggerd: ${random1} ${random2}`);
   }
   allCaves[random1][random2].containsWumpus = true;
   wumpusCurrentLocation = `Wumpus location: ${random1}, ${random2}`;
@@ -197,42 +206,50 @@ function cavesPlaceEverything(): void {
   placeBats();
   placeWumpus();
 }
-
-function startGame(): void {
-  mainTextArea.innerHTML = 'Great! What would you like your character to be called? <br> Press "Enter" to continue';
-  userTextInput.classList.toggle('hidden');
-}
-
-function textInputEHandler(e) {
-  console.log(e.key);
-  if (e.key === 'Enter') {
-    if (enterCounter === 0) {
-      userName = userTextInput.value;
-      mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
-      castle of Greveholm. 
-      Afraid to be alone? Lucky for you, you are not. There is also a beast by the name of Wumpus in the
-      treturous cave system. Your goal is to slay Wumpus before he kills you. There is loot you can find along 
-      the way to aid you, if you find it. Currently you only have a bow and two arrows.
-      <br> <br> Press Enter again to enter the first room`;
+function checkNearbyRoom() {
+  let alreadyTriggerd = {
+    bats: false,
+    traps: false,
+    wumpus: false,
+  };
+  for (let i = 0; i < 4; i++) {
+    const testcounter = [
+      { x: 0, y: -1 },
+      { x: 0, y: 1 },
+      { x: -1, y: 0 },
+      { x: 1, y: 0 },
+    ];
+    let tempX: number = currentLocation.x + testcounter[i].x;
+    let tempY: number = currentLocation.y + testcounter[i].y;
+    if (tempX < 0) {
+      tempX = 4;
     }
-   if (enterCounter === 1) {
-      displayRoom(0,0);
+    if (tempY < 0) {
+      tempY = 3;
     }
-    enterCounter =+ 1;
-    userTextInput.value = '';
+    if (tempX > 4) {
+      tempX = 0;
+    }
+    if (tempY > 3) {
+      tempY = 0;
+    }
+    console.log(tempX + ' X Counter: ' + i);
+    console.log(tempY + ' Y Counter: ' + i);
+    if (allCaves[tempX][tempY].containsBat && !alreadyTriggerd.bats) {
+      mainTextArea.innerHTML += '<br> I hear the menacing sounds of bats nearby... <br>';
+      alreadyTriggerd.bats = true;
+    }
+    if (allCaves[tempX][tempY].containsTrap && !alreadyTriggerd.traps ) {
+      mainTextArea.innerHTML += '<br> I feel a rush of wind, there must be a huge bottomless hole nearby... <br>';
+      alreadyTriggerd.traps = true;
+    }
+    if (allCaves[tempX][tempY].containsWumpus && !alreadyTriggerd.wumpus) {
+      mainTextArea.innerHTML += '<br> I get a feeling that everything is fine... <br>';
+      alreadyTriggerd.wumpus = true;
+    } 
+    tempX = 0;
+    tempY = 0;
   }
-}
-
-function movement(): void {
-  /**
-   * Hämta nuvarande position
-   * flytta åt något håll
-   * Kolla vad nytt rum innehåller
-   * Ge respons beroande på vad som finns i närliggande rum.
-   * Ge val att avfyra pil
-   * Ge val att kolla inventory
-   * Ge val att röra sig igen
-   */
 }
 function displayRoom(i: number, j: number) {
   /** TODO:
@@ -258,25 +275,41 @@ function displayRoom(i: number, j: number) {
     checkNearbyRoom();
   }
 }
-function checkNearbyRoom() {
-  for (let i = 0; i < 4; i++) {
-    const testcounter = [
-      { x: 0, y: -1 },
-      { x: 0, y: 1 },
-      { x: -1, y: 0 },
-      { x: 1, y: 0 }, // FIXME: Denna funkar inte alls
-    ];
-    if (allCaves[(currentLocation.x + testcounter[i].x)][(currentLocation.y + testcounter[i].y)].containsBat) {
-      mainTextArea.innerHTML =+ '<br> I hear the menacing souds of bats nearby...';
+function startGame(): void {
+  mainTextArea.innerHTML = 'Great! What would you like your character to be called? <br> Press "Enter" to continue';
+  userTextInput.classList.toggle('hidden');
+}
+
+function textInputEHandler(e) {
+  console.log(e.key);
+  if (e.key === 'Enter') {
+    if (enterCounter === 0) {
+      userName = userTextInput.value;
+      mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
+      castle of Greveholm. 
+      Afraid to be alone? Lucky for you, you are not. There is also a beast by the name of Wumpus in the
+      treturous cave system. Your goal is to slay Wumpus before he kills you. There is loot you can find along 
+      the way to aid you, if you find it. Currently you only have a bow and two arrows.
+      <br> <br> Press Enter again to enter the first room`;
     }
-    if (allCaves[(currentLocation.x + testcounter[i].x)][(currentLocation.y + testcounter[i].y)].containsTrap) {
-      mainTextArea.innerHTML =+ '<br> I fell a rush of wind, there must be a huge bottomless hole nearby...';
+    if (enterCounter === 1) {
+      displayRoom(0, 0);
     }
-    if (allCaves[(currentLocation.x + testcounter[i].x)][(currentLocation.y + testcounter[i].y)].containsWumpus) {
-      mainTextArea.innerHTML =+ '<br> I get a feeling that everything is fine...';
-    }
-    console.log(testcounter[i]);
+    enterCounter = +1;
+    userTextInput.value = '';
   }
+}
+
+function movement(): void {
+  /**
+   * Hämta nuvarande position
+   * flytta åt något håll
+   * Kolla vad nytt rum innehåller
+   * Ge respons beroande på vad som finns i närliggande rum.
+   * Ge val att avfyra pil
+   * Ge val att kolla inventory
+   * Ge val att röra sig igen
+   */
 }
 
 userTextInput.addEventListener('keypress', textInputEHandler);
