@@ -5,9 +5,19 @@ const mainStage = document.querySelector('#mainStage') as HTMLElement;
 const mainTextArea = document.querySelector('#mainTextArea') as HTMLElement;
 const userTextInput = document.querySelector('#userTextInput') as HTMLInputElement;
 const errorMsg = document.querySelector('#errorMsg') as HTMLDivElement;
+const gameOverScreen = document.querySelector('#gameOver') as HTMLDivElement;
+let highScoreList = [
+  {
+    name: 'Mattias',
+    score: 10,
+  },
+  {
+    name: 'Unkown',
+    score: 0,
+}];
 const nextRooms = [
-  { x: 0, y: -1 }, // S
-  { x: 0, y: 1 }, // N
+  { x: 0, y: -1 }, // N
+  { x: 0, y: 1 }, // S
   { x: -1, y: 0 }, // W
   { x: 1, y: 0 }, // E
 ];
@@ -166,11 +176,11 @@ function getRandomInt(max: number): number {
 
 function placeTraps(): void {
   for (let i = 0; i < 4; i++) {
-    let random1: number = getRandomInt(3);
+    let random1: number = getRandomInt(5);
     let random2: number = getRandomInt(4);
     console.log(random1 + ' ' + random2);
     while (random1 === 0 && random2 === 0) {
-      random1 = getRandomInt(3);
+      random1 = getRandomInt(5);
       random2 = getRandomInt(4);
     }
     allCaves[random1][random2].containsTrap = true;
@@ -180,10 +190,10 @@ function placeTraps(): void {
 
 function placeBats(): void {
   for (let i = 0; i < 6; i++) {
-    let random1: number = getRandomInt(3);
+    let random1: number = getRandomInt(5);
     let random2: number = getRandomInt(4);
-    while (random1 === 0 && random2 === 0) {
-      random1 = getRandomInt(3);
+    while ((random1 === 0 && random2 === 0) || (allCaves[random1][random2].containsTrap)) {
+      random1 = getRandomInt(5);
       random2 = getRandomInt(4);
     }
     allCaves[random1][random2].containsBat = true;
@@ -192,14 +202,14 @@ function placeBats(): void {
 }
 
 function placeWumpus(): void {
-  let random1: number = getRandomInt(3);
+  let random1: number = getRandomInt(5);
   let random2: number = getRandomInt(4);
   while (
     allCaves[random1][random2].containsTrap ||
     allCaves[random1][random2].containsBat ||
     (random1 === 0 && random2 === 0)
   ) {
-    random1 = getRandomInt(3);
+    random1 = getRandomInt(5);
     random2 = getRandomInt(4);
   }
   allCaves[random1][random2].containsWumpus = true;
@@ -241,18 +251,8 @@ function checkNearbyRoom() {
   for (let i = 0; i < 4; i++) {
     let tempX: number = currentLocation.x + nextRooms[i].x;
     let tempY: number = currentLocation.y + nextRooms[i].y;
-    if (tempX < 0) {
-      tempX = 4;
-    }
-    if (tempY < 0) {
-      tempY = 3;
-    }
-    if (tempX > 4) {
-      tempX = 0;
-    }
-    if (tempY > 3) {
-      tempY = 0;
-    }
+    tempX = checkXIsOk(tempX); // Kollar igenom grann rum.
+    tempY = checkYIsOk(tempY);
     if (allCaves[tempX][tempY].containsBat && !alreadyTriggerd.bats) {
       mainTextArea.innerHTML += '<br> I hear the menacing sounds of bats nearby... <br>';
       alreadyTriggerd.bats = true;
@@ -262,28 +262,29 @@ function checkNearbyRoom() {
       alreadyTriggerd.traps = true;
     }
     if (allCaves[tempX][tempY].containsWumpus && !alreadyTriggerd.wumpus) {
-      mainTextArea.innerHTML += '<br> I get a feeling that everything is fine... <br>';
+      mainTextArea.innerHTML += '<br> I smell the most awful of smells... <br>';
       alreadyTriggerd.wumpus = true;
     }
     tempX = 0;
     tempY = 0;
   }
+  if (!alreadyTriggerd.bats && !alreadyTriggerd.traps && !alreadyTriggerd.wumpus) {
+    mainTextArea.innerHTML += '<br> I get a feeling that everything is fine... <br>';
+  }
 }
-function batMovesUser() {
-  const fiftyFifty = getRandomInt(1);
-  if (fiftyFifty === 0) {
-    currentLocation.x += getRandomInt(2);
-  } else {
-    currentLocation.x -= getRandomInt(2);
+function gameOver() {
+  gameOverScreen.classList.toggle('hidden');
+  mainTextArea.innerHTML = '';
+  gameOverScreen.innerHTML = `GAME OVER ${userName} <br> <br>
+  <br> <br> Highscore list:
+    <ul> 
+      <li> ${highScoreList[0].name}: ${highScoreList[0].score}
+      <li> ${highScoreList[1].name}: ${highScoreList[1].score}
+    </ul>`;
+  if (enterCounter > highScoreList[0].score) {
+    gameOverScreen.innerHTML += '<br> <br> Very impressive...';
   }
-  if (fiftyFifty === 1) {
-    currentLocation.y -= getRandomInt(2);
-  } else {
-    currentLocation.y += getRandomInt(2);
-  }
-  currentLocation.x = checkXIsOk(currentLocation.x);
-  currentLocation.y = checkYIsOk(currentLocation.y);
-  displayRoom(currentLocation.x, currentLocation.y);
+  gameOverScreen.innerHTML += '<button>Restart Game?</button>';
 }
 
 function displayRoom(i: number, j: number) {
@@ -303,54 +304,78 @@ function displayRoom(i: number, j: number) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant hole in the middle. <br> 
     <br> You easily go around the hole and as you are in the clear. 
     <br> A stone falls down and kills you`;
-    //TODO: Trigger game over
+    gameOver();
   } else if (allCaves[i][j].containsWumpus) {
     mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
     <br> A movement deep in the dark is the last thing you see before you are slayed.`;
-    //TODO: Trigger game over
+    gameOver();
   } else {
-    mainTextArea.innerHTML = 'You have entered a new cave. <br>';
+    mainTextArea.innerHTML = `You have entered a new cave. x:${i} y:${j}<br>`;
     checkNearbyRoom();
     mainTextArea.innerHTML += 'Where would you like to go next? N/S/W/E';
   }
+}
+
+function batMovesUser() { 
+  const fiftyFifty = getRandomInt(2);
+  console.log('Batmove is triggered')
+  if (fiftyFifty === 0) {
+    currentLocation.x += getRandomInt(3);
+  } else {
+    currentLocation.y -= getRandomInt(3);
+  }
+  currentLocation.x = checkXIsOk(currentLocation.x);
+  currentLocation.y = checkYIsOk(currentLocation.y);
+  while (allCaves[currentLocation.x][currentLocation.y].containsBat
+   || allCaves[currentLocation.x][currentLocation.y].containsTrap
+   || allCaves[currentLocation.x][currentLocation.y].containsWumpus) {
+    currentLocation.x += getRandomInt(3);
+    currentLocation.y += getRandomInt(3);
+    console.warn('Batmove while loop triggerd');
+  }
+  currentLocation.x = checkXIsOk(currentLocation.x);
+  currentLocation.y = checkYIsOk(currentLocation.y);
+
+  displayRoom(currentLocation.x, currentLocation.y);
 }
 
 function startGame(): void {
   mainTextArea.innerHTML = 'Great! What would you like your character to be called? <br> Press "Enter" to continue';
   userTextInput.classList.toggle('hidden');
 }
+
 function movement(value: string): void {
   console.log(value);
   switch (value.toLowerCase()) {
     case 'n' || 'north':
-      currentLocation.x = +nextRooms[0].x;
-      currentLocation.y = +nextRooms[0].y;
+      currentLocation.x += nextRooms[0].x;
+      currentLocation.y += nextRooms[0].y;
       console.log('N is triggerd');
       break;
     case 's' || 'south':
-      currentLocation.x = +nextRooms[1].x;
-      currentLocation.y = +nextRooms[1].y;
+      currentLocation.x += nextRooms[1].x;
+      currentLocation.y += nextRooms[1].y;
       console.log('S is triggerd');
       break;
     case 'w' || 'west':
-      currentLocation.x = +nextRooms[2].x;
-      currentLocation.y = +nextRooms[2].y;
+      currentLocation.x += nextRooms[2].x;
+      currentLocation.y += nextRooms[2].y;
       console.log('W is triggerd');
       break;
     case 'e' || 'east':
-      currentLocation.x = +nextRooms[3].x;
-      currentLocation.y = +nextRooms[3].y;
+      currentLocation.x += nextRooms[3].x;
+      currentLocation.y += nextRooms[3].y;
       console.log('E is triggerd');
       break;
     default:
-      errorMsg.innerHTML = ' <br> <br> Wrong input';
+      errorMsg.innerHTML = ' <br> <br> Wrong input. Use N/S/W/E';
+      break;
   }
   currentLocation.x = checkXIsOk(currentLocation.x);
   currentLocation.y = checkYIsOk(currentLocation.y);
   displayRoom(currentLocation.x, currentLocation.y);
 }
 function textInputEHandler(e) {
-  console.log(e.key);
   if (e.key === 'Enter') {
     if (enterCounter === 0) {
       // Första gången man startar och trycker enter så anges detta
@@ -364,14 +389,14 @@ function textInputEHandler(e) {
         mainTextArea.innerHTML = `You navigate using the field below. 
         Simply put in the direktion you would like to go in. <br> <br> Either using full names or the first letter.
         <br> North <br> South <br> West <br> East <br> <br> Press Enter again to enter the first cave;`;
-      }, 6000);
+      }, 5000);
     }
     if (enterCounter === 1) {
       displayRoom(0, 0);
     }
     if (enterCounter > 1) {
       // Sköter all hantering efter spelet har kommit igång
-      console.log('enterCounter mer than 1');
+      console.log('enterCounter more than 1');
       movement(userTextInput.value);
       displayRoom(currentLocation.x, currentLocation.y);
     }

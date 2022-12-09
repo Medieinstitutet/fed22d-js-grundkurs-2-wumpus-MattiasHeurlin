@@ -59,3 +59,10 @@ section {
   z-index: 0;
   border: 3px solid #431c53;
 }
+#gameOver {
+  text-align: center;
+  button {
+    width: 200px;
+    height: 60px;
+  }
+}
