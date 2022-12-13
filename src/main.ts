@@ -14,7 +14,8 @@ let highScoreList = [
   {
     name: 'Unkown',
     score: 0,
-}];
+  },
+];
 const nextRooms = [
   { x: 0, y: -1 }, // N
   { x: 0, y: 1 }, // S
@@ -28,7 +29,7 @@ let currentLocation = {
 };
 let wumpusCurrentLocation: any;
 let enterCounter = 0;
-
+let userArrowCounter = 3;
 interface CaveRooms {
   containsWumpus: boolean;
   containsItem: string[];
@@ -36,9 +37,9 @@ interface CaveRooms {
   containsBat: boolean;
 }
 
-const allCaves /*: CaveRooms - Ger många errors FIXME: */ = [
+const allCaves /*: CaveRooms - FIXME: */ = [
   [
-    // Tar upp mycket plats, men eslint vill att man skriver såhär
+    // TODO: compress this declaration
     {
       containsWumpus: false,
       containsItem: [],
@@ -176,39 +177,54 @@ function getRandomInt(max: number): number {
 
 function placeTraps(): void {
   for (let i = 0; i < 4; i++) {
+    let tries = 0;
     let random1: number = getRandomInt(5);
     let random2: number = getRandomInt(4);
-    console.log(random1 + ' ' + random2);
-    while (random1 === 0 && random2 === 0) {
+    while (
+      ((random1 === 0 && random2 === 0) ||
+        allCaves[random1][random2].containsTrap ||
+        allCaves[random1][random2].containsBat) &&
+      tries < 20
+    ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
+      tries += 1;
+      if (tries === 19) {
+        console.error('Unable to place traps.');
+      }
     }
     allCaves[random1][random2].containsTrap = true;
-    console.log(`Traps have been placed: ${random1} ${random2}`);
+    console.log(`Traps have been placed: ${random1}:${random2}`);
   }
 }
 
 function placeBats(): void {
   for (let i = 0; i < 6; i++) {
+    let tries = 0;
     let random1: number = getRandomInt(5);
     let random2: number = getRandomInt(4);
-    while ((random1 === 0 && random2 === 0) || (allCaves[random1][random2].containsTrap)) {
+    while (
+      ((random1 === 0 && random2 === 0) ||
+        allCaves[random1][random2].containsTrap ||
+        allCaves[random1][random2].containsBat) &&
+      tries < 20
+    ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
+      tries += 1;
+      if (tries === 19) {
+        console.error('Unable to place bats.');
+      }
     }
     allCaves[random1][random2].containsBat = true;
-    console.log(`Bats have been placed: ${i}`);
+    console.log(`Bats have been placed: ${random1}:${random2}`);
   }
 }
 
 function placeWumpus(): void {
   let random1: number = getRandomInt(5);
   let random2: number = getRandomInt(4);
-  while (
-    allCaves[random1][random2].containsTrap ||
-    allCaves[random1][random2].containsBat ||
-    (random1 === 0 && random2 === 0)
-  ) {
+  while (random1 === 0 && random2 === 0) {
     random1 = getRandomInt(5);
     random2 = getRandomInt(4);
   }
@@ -218,9 +234,9 @@ function placeWumpus(): void {
 }
 
 function cavesPlaceEverything(): void {
+  placeWumpus();
   placeTraps();
   placeBats();
-  placeWumpus();
 }
 
 function checkXIsOk(x: number) {
@@ -272,19 +288,20 @@ function checkNearbyRoom() {
     mainTextArea.innerHTML += '<br> I get a feeling that everything is fine... <br>';
   }
 }
-function gameOver() {
+function gameOver(reason:string) {
+  console.log('Gameover screen triggerd');
   gameOverScreen.classList.toggle('hidden');
+  userTextInput.classList.toggle('hidden');
   mainTextArea.innerHTML = '';
-  gameOverScreen.innerHTML = `GAME OVER ${userName} <br> <br>
+  gameOverScreen.innerHTML = `GAME OVER <br> <br>
+  ${userName} ${reason}
   <br> <br> Highscore list:
     <ul> 
       <li> ${highScoreList[0].name}: ${highScoreList[0].score}
       <li> ${highScoreList[1].name}: ${highScoreList[1].score}
-    </ul>`;
-  if (enterCounter > highScoreList[0].score) {
-    gameOverScreen.innerHTML += '<br> <br> Very impressive...';
-  }
-  gameOverScreen.innerHTML += '<button>Restart Game?</button>';
+    </ul>
+    <button>Restart Game?</button>
+    `; // TODO: Restart butten function
 }
 
 function displayRoom(i: number, j: number) {
@@ -304,11 +321,11 @@ function displayRoom(i: number, j: number) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant hole in the middle. <br> 
     <br> You easily go around the hole and as you are in the clear. 
     <br> A stone falls down and kills you`;
-    gameOver();
+    gameOver('was killed due to head trauma');
   } else if (allCaves[i][j].containsWumpus) {
     mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
     <br> A movement deep in the dark is the last thing you see before you are slayed.`;
-    gameOver();
+    gameOver('was eaten by the Wumpus');
   } else {
     mainTextArea.innerHTML = `You have entered a new cave. x:${i} y:${j}<br>`;
     checkNearbyRoom();
@@ -316,9 +333,9 @@ function displayRoom(i: number, j: number) {
   }
 }
 
-function batMovesUser() { 
+function batMovesUser(): void {
   const fiftyFifty = getRandomInt(2);
-  console.log('Batmove is triggered')
+  console.log('Batmove is triggered');
   if (fiftyFifty === 0) {
     currentLocation.x += getRandomInt(3);
   } else {
@@ -326,15 +343,17 @@ function batMovesUser() {
   }
   currentLocation.x = checkXIsOk(currentLocation.x);
   currentLocation.y = checkYIsOk(currentLocation.y);
-  while (allCaves[currentLocation.x][currentLocation.y].containsBat
+  while (
+    allCaves[currentLocation.x][currentLocation.y].containsBat
    || allCaves[currentLocation.x][currentLocation.y].containsTrap
-   || allCaves[currentLocation.x][currentLocation.y].containsWumpus) {
-    currentLocation.x += getRandomInt(3);
-    currentLocation.y += getRandomInt(3);
+   || allCaves[currentLocation.x][currentLocation.y].containsWumpus
+  ) {
+    currentLocation.x += getRandomInt(4);
+    currentLocation.y += getRandomInt(4);
+    currentLocation.x = checkXIsOk(currentLocation.x);
+    currentLocation.y = checkYIsOk(currentLocation.y);
     console.warn('Batmove while loop triggerd');
   }
-  currentLocation.x = checkXIsOk(currentLocation.x);
-  currentLocation.y = checkYIsOk(currentLocation.y);
 
   displayRoom(currentLocation.x, currentLocation.y);
 }
@@ -342,6 +361,56 @@ function batMovesUser() {
 function startGame(): void {
   mainTextArea.innerHTML = 'Great! What would you like your character to be called? <br> Press "Enter" to continue';
   userTextInput.classList.toggle('hidden');
+}
+
+function flyingArrow(direction: number) {
+  let arrowLocationX = currentLocation.x; // TODO: Copy the obect to one variable instead?
+  let arrowLocationY = currentLocation.y;
+  userArrowCounter -= 1;
+  for (let i = 0; i < 3; i++) {
+    arrowLocationX += nextRooms[direction].x;
+    arrowLocationY += nextRooms[direction].y;
+    arrowLocationX = checkXIsOk(arrowLocationX);
+    arrowLocationY = checkYIsOk(arrowLocationY);
+    if (allCaves[arrowLocationX][arrowLocationY].containsWumpus) {
+      // TODO: Display victory screen
+      console.log('Wumpus has been hit');
+      return;
+    } if (arrowLocationX === currentLocation.x && arrowLocationY === currentLocation.y) {
+      gameOver('shot himself with an arrow');
+      console.log('You killed yourself');
+      return;
+    }
+  }
+  mainTextArea.innerHTML += 'It appears the arrow did not hit anything...';
+}
+
+function shootArrow(value: string): void {
+  console.log(userArrowCounter);
+  switch (value.toLowerCase().replace('shoot ', '')) {
+    case 'n' || 'north':
+      flyingArrow(0);
+      break;
+    case 's' || 'south':
+      flyingArrow(1);
+      break;
+    case 'w' || 'west':
+      flyingArrow(2);
+      break;
+    case 'e' || 'east':
+      flyingArrow(3);
+      break;
+    default:
+      console.log(value);
+      errorMsg.innerHTML = ' <br> <br> Wrong input. Use "Shoot N/S/W/E"';
+      break;
+  }
+  if (userArrowCounter === 1) {
+    mainTextArea.innerHTML += 'You are down to your last arrow. If you waste it, there is no hope.';
+  }
+  if (userArrowCounter === 0) {
+    gameOver('Ran out of arrows');
+  }
 }
 
 function movement(value: string): void {
@@ -375,7 +444,7 @@ function movement(value: string): void {
   currentLocation.y = checkYIsOk(currentLocation.y);
   displayRoom(currentLocation.x, currentLocation.y);
 }
-function textInputEHandler(e) {
+function textInputEHandler(e: KeyboardEvent): void {
   if (e.key === 'Enter') {
     if (enterCounter === 0) {
       // Första gången man startar och trycker enter så anges detta
@@ -396,6 +465,10 @@ function textInputEHandler(e) {
     }
     if (enterCounter > 1) {
       // Sköter all hantering efter spelet har kommit igång
+      if (userTextInput.value.toLowerCase().includes('shoot')) {
+        shootArrow(userTextInput.value);
+        return;
+      }
       console.log('enterCounter more than 1');
       movement(userTextInput.value);
       displayRoom(currentLocation.x, currentLocation.y);
