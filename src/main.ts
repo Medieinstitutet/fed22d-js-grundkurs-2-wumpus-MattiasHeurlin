@@ -6,6 +6,7 @@ const mainTextArea = document.querySelector('#mainTextArea') as HTMLElement;
 const userTextInput = document.querySelector('#userTextInput') as HTMLInputElement;
 const errorMsg = document.querySelector('#errorMsg') as HTMLDivElement;
 const gameOverScreen = document.querySelector('#gameOver') as HTMLDivElement;
+// eslint-disable-next-line prefer-const
 let highScoreList = [
   {
     name: 'Mattias',
@@ -23,6 +24,7 @@ const nextRooms = [
   { x: 1, y: 0 }, // E
 ];
 let userName = '';
+// eslint-disable-next-line prefer-const
 let currentLocation = {
   x: 0,
   y: 0,
@@ -288,10 +290,28 @@ function checkNearbyRoom() {
     mainTextArea.innerHTML += '<br> I get a feeling that everything is fine... <br>';
   }
 }
+
+function fullReset():void {
+  for (let i = 0; i < allCaves.length;i++) {
+    for (let j = 0; j < allCaves[i].length; j++) {
+      allCaves[i][j].containsBat = false;
+      allCaves[i][j].containsTrap = false;
+      allCaves[i][j].containsWumpus = false;
+    }
+  }
+  cavesPlaceEverything();
+  userArrowCounter = 3;
+  enterCounter = 0;
+  currentLocation.x = 0;
+  currentLocation.y = 0;
+  gameOverScreen.classList.add('hidden');
+  startGame();
+}
+
 function gameOver(reason:string) {
   console.log('Gameover screen triggerd');
-  gameOverScreen.classList.toggle('hidden');
-  userTextInput.classList.toggle('hidden');
+  gameOverScreen.classList.remove('hidden');
+  userTextInput.classList.add('hidden');
   mainTextArea.innerHTML = '';
   gameOverScreen.innerHTML = `GAME OVER <br> <br>
   ${userName} ${reason}
@@ -300,8 +320,9 @@ function gameOver(reason:string) {
       <li> ${highScoreList[0].name}: ${highScoreList[0].score}
       <li> ${highScoreList[1].name}: ${highScoreList[1].score}
     </ul>
-    <button>Restart Game?</button>
+    <button id="restartBtn">Restart Game?</button>
     `; // TODO: Restart butten function
+  document.querySelector('#restartBtn')?.addEventListener('click', fullReset);
 }
 
 function displayRoom(i: number, j: number) {
@@ -321,11 +342,15 @@ function displayRoom(i: number, j: number) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant hole in the middle. <br> 
     <br> You easily go around the hole and as you are in the clear. 
     <br> A stone falls down and kills you`;
-    gameOver('was killed due to head trauma');
+    setTimeout(() => {
+      gameOver('was killed due to head trauma');
+    }, 3000);
   } else if (allCaves[i][j].containsWumpus) {
     mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
     <br> A movement deep in the dark is the last thing you see before you are slayed.`;
-    gameOver('was eaten by the Wumpus');
+    setTimeout(() => {
+      gameOver('was eaten by the Wumpus');
+    }, 3000);
   } else {
     mainTextArea.innerHTML = `You have entered a new cave. x:${i} y:${j}<br>`;
     checkNearbyRoom();
@@ -374,7 +399,7 @@ function flyingArrow(direction: number) {
     arrowLocationY = checkYIsOk(arrowLocationY);
     if (allCaves[arrowLocationX][arrowLocationY].containsWumpus) {
       // TODO: Display victory screen
-      console.log('Wumpus has been hit');
+      console.log('<br> <br> Wumpus has been hit');
       return;
     } if (arrowLocationX === currentLocation.x && arrowLocationY === currentLocation.y) {
       gameOver('shot himself with an arrow');
@@ -382,7 +407,7 @@ function flyingArrow(direction: number) {
       return;
     }
   }
-  mainTextArea.innerHTML += 'It appears the arrow did not hit anything...';
+  mainTextArea.innerHTML += '<br> <br> It appears the arrow did not hit anything...';
 }
 
 function shootArrow(value: string): void {
@@ -406,48 +431,59 @@ function shootArrow(value: string): void {
       break;
   }
   if (userArrowCounter === 1) {
-    mainTextArea.innerHTML += 'You are down to your last arrow. If you waste it, there is no hope.';
+    mainTextArea.innerHTML += '<br> <br> You are down to your last arrow. If you waste it, there is no hope.';
   }
   if (userArrowCounter === 0) {
-    gameOver('Ran out of arrows');
+    gameOver('ran out of arrows');
   }
 }
 
 function movement(value: string): void {
-  console.log(value);
+  let errorTriggerd = false;
+  
   switch (value.toLowerCase()) {
-    case 'n' || 'north':
+    case 'n':
+    case 'north':
+      console.log(value);
       currentLocation.x += nextRooms[0].x;
       currentLocation.y += nextRooms[0].y;
       console.log('N is triggerd');
       break;
-    case 's' || 'south':
+    case 's':
+    case 'south':
       currentLocation.x += nextRooms[1].x;
       currentLocation.y += nextRooms[1].y;
       console.log('S is triggerd');
       break;
-    case 'w' || 'west':
+    case 'w':
+    case 'west':
       currentLocation.x += nextRooms[2].x;
       currentLocation.y += nextRooms[2].y;
       console.log('W is triggerd');
       break;
-    case 'e' || 'east':
+    case 'e':
+    case 'east':
       currentLocation.x += nextRooms[3].x;
       currentLocation.y += nextRooms[3].y;
       console.log('E is triggerd');
       break;
     default:
-      errorMsg.innerHTML = ' <br> <br> Wrong input. Use N/S/W/E';
+      errorMsg.innerHTML = '<br> <br> Wrong input. Use N/S/W/E';
+      console.log('default movement');
+      errorTriggerd = true;
       break;
   }
-  currentLocation.x = checkXIsOk(currentLocation.x);
-  currentLocation.y = checkYIsOk(currentLocation.y);
-  displayRoom(currentLocation.x, currentLocation.y);
+  if (!errorTriggerd) {
+    currentLocation.x = checkXIsOk(currentLocation.x);
+    currentLocation.y = checkYIsOk(currentLocation.y);
+    displayRoom(currentLocation.x, currentLocation.y);
+  }
 }
 function textInputEHandler(e: KeyboardEvent): void {
   if (e.key === 'Enter') {
     if (enterCounter === 0) {
       // Första gången man startar och trycker enter så anges detta
+      userTextInput.classList.add('hidden');
       userName = userTextInput.value;
       mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
       castle of Greveholm. 
@@ -455,9 +491,12 @@ function textInputEHandler(e: KeyboardEvent): void {
       treturous cave system. Your goal is to slay Wumpus before he kills you. There is loot you can find along 
       the way to aid you, if you find it. Currently you only have a bow and three arrows.`;
       setTimeout(() => {
+        userTextInput.classList.remove('hidden');
         mainTextArea.innerHTML = `You navigate using the field below. 
         Simply put in the direktion you would like to go in. <br> <br> Either using full names or the first letter.
-        <br> North <br> South <br> West <br> East <br> <br> Press Enter again to enter the first cave;`;
+        <br> North / South / West / East <br> <br>
+        If you wish to shoot your bow, insert "Shoot" plus the direction. <br> <br>
+        Press Enter again to enter the first cave;`;
       }, 5000);
     }
     if (enterCounter === 1) {
@@ -471,7 +510,6 @@ function textInputEHandler(e: KeyboardEvent): void {
       }
       console.log('enterCounter more than 1');
       movement(userTextInput.value);
-      displayRoom(currentLocation.x, currentLocation.y);
     }
     enterCounter += 1;
     userTextInput.value = '';

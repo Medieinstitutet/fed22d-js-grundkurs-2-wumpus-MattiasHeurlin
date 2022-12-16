@@ -1,6 +1,7 @@
 body {
   font-family: 'Press Start 2P', cursive;
   color: #e806cb;
+  font-size: 0.9rem;
 }
 
 .hidden {
@@ -49,6 +50,7 @@ main {
   width: 200px;
   height: 40px;
 }
+
 section {
   position: relative;
   width: 620px; // TODO: Responsivitet vid olika skärmar
@@ -59,6 +61,7 @@ section {
   z-index: 0;
   border: 3px solid #431c53;
 }
+
 #gameOver {
   text-align: center;
   button {
