@@ -18,10 +18,6 @@ let highScoreList = [
     name: 'Mattias',
     score: 10,
   },
-  {
-    name: 'Unkown',
-    score: 0,
-  },
 ];
 const nextRooms = [
   { x: 0, y: -1 }, // N
@@ -38,6 +34,7 @@ let currentLocation = {
 let wumpusCurrentLocation: any;
 let enterCounter = 0;
 let userArrowCounter = 3;
+let userPointCounter = 0;
 interface CaveRooms {
   containsWumpus: boolean;
   containsItem: string[];
@@ -213,9 +210,9 @@ function placeBats(): void {
     let random2: number = getRandomInt(4);
     while (
       ((random1 === 0 && random2 === 0) ||
-        allCaves[random1][random2].containsTrap ||
-        allCaves[random1][random2].containsBat) &&
-      tries < 20
+        allCaves[random1][random2].containsTrap
+       || allCaves[random1][random2].containsBat)
+      && tries < 20
     ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
@@ -298,6 +295,7 @@ function checkNearbyRoom() {
 }
 
 function fullReset(): void {
+  canvasRooms(); // resets the canvas display
   for (let i = 0; i < allCaves.length; i++) {
     for (let j = 0; j < allCaves[i].length; j++) {
       allCaves[i][j].containsBat = false;
@@ -310,24 +308,38 @@ function fullReset(): void {
   enterCounter = 0;
   currentLocation.x = 0;
   currentLocation.y = 0;
+  userName = '';
+  userPointCounter = '';
   gameOverScreen.classList.add('hidden');
   startGame();
 }
+function calcUserScore():void {
+  const newUserScore = {name: userName, score: userArrowCounter};
+  highScoreList.push(newUserScore);
+}
 
-function gameOver(reason: string) {
+function gameOver(win:boolean, reason: string) {
+  if (win) { // Only includes the player score if the play won.
+    calcUserScore();
+  }
   console.log('Gameover screen triggerd');
   gameOverScreen.classList.remove('hidden');
   userTextInput.classList.add('hidden');
   mainTextArea.innerHTML = '';
-  gameOverScreen.innerHTML = `GAME OVER <br> <br>
+  if (!win) {
+    gameOverScreen.innerHTML = 'GAME OVER <br> <br>';
+  } else {
+    gameOverScreen.innerHTML = 'VICTORY! <br> <br>';
+  }
+  gameOverScreen.innerHTML += `
   ${userName} ${reason}
   <br> <br> Highscore list:
-    <ul> 
-      <li> ${highScoreList[0].name}: ${highScoreList[0].score}
-      <li> ${highScoreList[1].name}: ${highScoreList[1].score}
-    </ul>
-    <button id="restartBtn">Restart Game?</button>
-    `; // TODO: Restart butten function
+    <ul> `;
+  highScoreList.forEach((user) => {
+    gameOverScreen.innerHTML += `<li> ${user.name}: ${user.score} </li>`
+  })
+  gameOverScreen.innerHTML += `</ul> 
+  <button id="restartBtn">Restart Game?</button>`;
   document.querySelector('#restartBtn')?.addEventListener('click', fullReset);
 }
 
@@ -349,13 +361,13 @@ function displayRoom(i: number, j: number) {
     <br> You easily go around the hole and as you are in the clear. 
     <br> A stone falls down and kills you`;
     setTimeout(() => {
-      gameOver('was killed due to head trauma');
+      gameOver(false, 'was killed due to head trauma');
     }, 3000);
   } else if (allCaves[i][j].containsWumpus) {
     mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
     <br> A movement deep in the dark is the last thing you see before you are slayed.`;
     setTimeout(() => {
-      gameOver('was eaten by the Wumpus');
+      gameOver(false, 'was eaten by the Wumpus');
     }, 3000);
   } else {
     mainTextArea.innerHTML = `You have entered a new cave. x:${i} y:${j}<br>`;
@@ -411,12 +423,12 @@ function flyingArrow(direction: number) {
       arrowLocationY = checkYIsOk(arrowLocationY);
       ctx.drawImage(arrowImg, arrowLocationX * 60, arrowLocationY * 50, 35, 35);
       if (allCaves[arrowLocationX][arrowLocationY].containsWumpus) {
-        // TODO: Display victory screen
+        gameOver(true, 'has slain the Wumpus');
         console.log('<br> <br> Wumpus has been hit');
         return;
       }
       if (arrowLocationX === currentLocation.x && arrowLocationY === currentLocation.y) {
-        gameOver('shot himself with an arrow');
+        gameOver(false, 'shot himself with an arrow');
         console.log('You killed yourself');
         return;
       }
@@ -454,13 +466,13 @@ function shootArrow(value: string): void {
     mainTextArea.innerHTML += '<br> <br> You are down to your last arrow. If you waste it, there is no hope.';
   }
   if (userArrowCounter === 0) {
-    gameOver('ran out of arrows');
+    gameOver(false, 'ran out of arrows');
   }
 }
 
 function movement(value: string): void {
   let errorTriggerd = false;
-
+  userPointCounter += 1;
   switch (value.toLowerCase()) {
     case 'n':
     case 'north':
@@ -550,7 +562,7 @@ function textInputEHandler(e: KeyboardEvent): void {
         mainTextArea.innerHTML = `You navigate using the field below. 
         Simply put in the direktion you would like to go in. <br> <br> Either using full names or the first letter.
         <br> North / South / West / East <br> <br>
-        If you wish to shoot your bow, insert "Shoot" plus the direction. <br> <br>
+        If you wish to shoot your bow, insert "Shoot" and the direction. <br> <br>
         Press Enter again to enter the first cave;`;
       }, 5000);
     }
