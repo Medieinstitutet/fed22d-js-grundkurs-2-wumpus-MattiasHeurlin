@@ -357,9 +357,7 @@ function displayRoom(i: number, j: number) {
     }, 3000);
   } else {
     mainTextArea.innerHTML = `You have entered a new cave. x:${i} y:${j}<br>`;
-    if (canvas.getContext) {
-      ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
-    }
+    handleUserImg('show');
     checkNearbyRoom();
     mainTextArea.innerHTML += 'Where would you like to go next? N/S/W/E';
   }
@@ -487,6 +485,20 @@ function movement(value: string): void {
     displayRoom(currentLocation.x, currentLocation.y);
   }
 }
+function handleUserImg(reason:string) {
+  if (canvas.getContext) {
+  switch (reason) {
+    case 'clear': 
+     ctx.clearRect(currentLocation.x * 60, currentLocation.y * 50, 55, 45);
+    break;
+    case 'show':
+      ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
+    break;
+    case 'bat':
+      //TODO: Rotate the img a few turn incase the player meets a bat.
+    }
+  }
+}
 
 function canvasRooms(): void {
   if (canvas.getContext) {
@@ -534,9 +546,7 @@ function textInputEHandler(e: KeyboardEvent): void {
         shootArrow(userTextInput.value);
         return;
       }
-      if (canvas.getContext) {
-        ctx.clearRect(currentLocation.x * 60, currentLocation.y * 50, 55, 45);
-      }
+      handleUserImg('clear');
       console.log('enterCounter more than 1');
       movement(userTextInput.value);
     }
