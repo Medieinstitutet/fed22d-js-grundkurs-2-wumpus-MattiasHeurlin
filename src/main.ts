@@ -311,8 +311,11 @@ function fullReset(): void {
   userName = '';
   userPointCounter = '';
   gameOverScreen.classList.add('hidden');
+  enterCounter = 1; // so the player wont need to read all the text again
+  userTextInput.value = '';
   startGame();
 }
+
 function calcUserScore():void {
   const newUserScore = {name: userName, score: userArrowCounter};
   highScoreList.push(newUserScore);
@@ -337,7 +340,7 @@ function gameOver(win:boolean, reason: string) {
     <ul> `;
   highScoreList.forEach((user) => {
     gameOverScreen.innerHTML += `<li> ${user.name}: ${user.score} </li>`
-  })
+  });
   gameOverScreen.innerHTML += `</ul> 
   <button id="restartBtn">Restart Game?</button>`;
   document.querySelector('#restartBtn')?.addEventListener('click', fullReset);
@@ -407,11 +410,13 @@ function startGame(): void {
   What would you like your character to be called? <br> Press "Enter" to continue </span>`;
   userTextInput.classList.toggle('hidden');
   document.querySelector('#startBtn')?.classList.add('hidden');
+  canvasRooms();
 }
 
 function flyingArrow(direction: number) {
-  let arrowLocationX = currentLocation.x; // TODO: Copy the obect to one variable instead?
+  let arrowLocationX = currentLocation.x;
   let arrowLocationY = currentLocation.y;
+  let wumpusGotHit = false;
   userArrowCounter -= 1;
   const timer = ms => new Promise(res => setTimeout(res, ms));
   async function load():Promise<void> {
@@ -425,6 +430,8 @@ function flyingArrow(direction: number) {
       if (allCaves[arrowLocationX][arrowLocationY].containsWumpus) {
         gameOver(true, 'has slain the Wumpus');
         console.log('<br> <br> Wumpus has been hit');
+        i = 3;
+        wumpusGotHit = true;
         return;
       }
       if (arrowLocationX === currentLocation.x && arrowLocationY === currentLocation.y) {
@@ -433,28 +440,37 @@ function flyingArrow(direction: number) {
         return;
       }
       // eslint-disable-next-line no-await-in-loop
-      await timer(800);
+      await timer(600);
       ctx.clearRect(arrowLocationX * 60, arrowLocationY * 50, 55, 45);
     }
   }
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   load();
+  if (wumpusGotHit) {
+    return;
+  }
+  if (mainTextArea.innerHTML.includes('It appears the arrow did not hit anything')) {
+    return; // If it is aleardy currently showing.
+  }
   mainTextArea.innerHTML += '<br> <br> It appears the arrow did not hit anything...';
 }
 
 function shootArrow(value: string): void {
-  console.log(userArrowCounter);
   switch (value.toLowerCase().replace('shoot ', '')) {
-    case 'n' || 'north':
+    case 'n':
+    case 'north':
       flyingArrow(0);
       break;
-    case 's' || 'south':
+    case 's':
+    case 'south':
       flyingArrow(1);
       break;
-    case 'w' || 'west':
+    case 'w':
+    case 'west':
       flyingArrow(2);
       break;
-    case 'e' || 'east':
+    case 'e':
+    case 'east':
       flyingArrow(3);
       break;
     default:
@@ -462,10 +478,10 @@ function shootArrow(value: string): void {
       errorMsg.innerHTML = ' <br> <br> Wrong input. Use "Shoot N/S/W/E"';
       break;
   }
-  if (userArrowCounter === 1) {
+  if (userArrowCounter === 1 && mainTextArea.innerHTML.includes('VICTORY!')) {
     mainTextArea.innerHTML += '<br> <br> You are down to your last arrow. If you waste it, there is no hope.';
   }
-  if (userArrowCounter === 0) {
+  if (userArrowCounter === 0 && mainTextArea.innerHTML.includes('VICTORY!')) {
     gameOver(false, 'ran out of arrows');
   }
 }
@@ -589,4 +605,3 @@ document.querySelector('#startBtn')?.addEventListener('click', startGame);
 
 cavesPlaceEverything();
 console.table(allCaves);
-canvasRooms();
