@@ -6,6 +6,10 @@ const mainTextArea = document.querySelector('#mainTextArea') as HTMLElement;
 const userTextInput = document.querySelector('#userTextInput') as HTMLInputElement;
 const errorMsg = document.querySelector('#errorMsg') as HTMLDivElement;
 const gameOverScreen = document.querySelector('#gameOver') as HTMLDivElement;
+const canvas = document.querySelector('#roomCanvas') as HTMLCanvasElement;
+let ctx:any;
+const userCharImage = new Image();
+userCharImage.src = 'src/style/vendor/images/adventure.png';
 // eslint-disable-next-line prefer-const
 let highScoreList = [
   {
@@ -353,6 +357,9 @@ function displayRoom(i: number, j: number) {
     }, 3000);
   } else {
     mainTextArea.innerHTML = `You have entered a new cave. x:${i} y:${j}<br>`;
+    if (canvas.getContext) {
+      ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
+    }
     checkNearbyRoom();
     mainTextArea.innerHTML += 'Where would you like to go next? N/S/W/E';
   }
@@ -384,7 +391,8 @@ function batMovesUser(): void {
 }
 
 function startGame(): void {
-  mainTextArea.innerHTML = 'Great! What would you like your character to be called? <br> Press "Enter" to continue';
+  mainTextArea.innerHTML = `<span> Great! 
+  What would you like your character to be called? <br> Press "Enter" to continue </span>`;
   userTextInput.classList.toggle('hidden');
 }
 
@@ -479,6 +487,24 @@ function movement(value: string): void {
     displayRoom(currentLocation.x, currentLocation.y);
   }
 }
+
+function canvasRooms(): void {
+  if (canvas.getContext) {
+    ctx = canvas.getContext('2d');
+    for (let row = 0; row < allCaves.length; row++) {
+      for (let col = 0; col < allCaves[row].length; col++) {
+        ctx.fillStyle = 'rgb(45, 0, 45)';
+        ctx.fillRect(row * 60, col * 50, 60, 50);
+        ctx.clearRect(row * 60, col * 50, 55, 45);
+      }
+    }
+ }
+  else {
+    console.error('canvas is not supported');
+    //TODO: Backup image, incase canvas is not supported.
+  }
+}
+
 function textInputEHandler(e: KeyboardEvent): void {
   if (e.key === 'Enter') {
     if (enterCounter === 0) {
@@ -508,6 +534,9 @@ function textInputEHandler(e: KeyboardEvent): void {
         shootArrow(userTextInput.value);
         return;
       }
+      if (canvas.getContext) {
+        ctx.clearRect(currentLocation.x * 60, currentLocation.y * 50, 55, 45);
+      }
       console.log('enterCounter more than 1');
       movement(userTextInput.value);
     }
@@ -516,8 +545,10 @@ function textInputEHandler(e: KeyboardEvent): void {
   }
 }
 
+
 userTextInput.addEventListener('keypress', textInputEHandler);
 document.querySelector('#startBtn')?.addEventListener('click', startGame);
 
 cavesPlaceEverything();
 console.table(allCaves);
+canvasRooms();
