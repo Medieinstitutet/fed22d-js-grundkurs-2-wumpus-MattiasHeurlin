@@ -7,9 +7,11 @@ const userTextInput = document.querySelector('#userTextInput') as HTMLInputEleme
 const errorMsg = document.querySelector('#errorMsg') as HTMLDivElement;
 const gameOverScreen = document.querySelector('#gameOver') as HTMLDivElement;
 const canvas = document.querySelector('#roomCanvas') as HTMLCanvasElement;
-let ctx:any;
+let ctx: any;
 const userCharImage = new Image();
 userCharImage.src = 'src/style/vendor/images/adventure.png';
+const arrowImg = new Image();
+arrowImg.src = 'src/style/vendor/images/arrow.png';
 // eslint-disable-next-line prefer-const
 let highScoreList = [
   {
@@ -188,9 +190,9 @@ function placeTraps(): void {
     let random2: number = getRandomInt(4);
     while (
       ((random1 === 0 && random2 === 0) ||
-        allCaves[random1][random2].containsTrap ||
-        allCaves[random1][random2].containsBat) &&
-      tries < 20
+        allCaves[random1][random2].containsTrap
+      || allCaves[random1][random2].containsBat)
+      && tries < 20
     ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
@@ -295,8 +297,8 @@ function checkNearbyRoom() {
   }
 }
 
-function fullReset():void {
-  for (let i = 0; i < allCaves.length;i++) {
+function fullReset(): void {
+  for (let i = 0; i < allCaves.length; i++) {
     for (let j = 0; j < allCaves[i].length; j++) {
       allCaves[i][j].containsBat = false;
       allCaves[i][j].containsTrap = false;
@@ -312,7 +314,7 @@ function fullReset():void {
   startGame();
 }
 
-function gameOver(reason:string) {
+function gameOver(reason: string) {
   console.log('Gameover screen triggerd');
   gameOverScreen.classList.remove('hidden');
   userTextInput.classList.add('hidden');
@@ -374,9 +376,9 @@ function batMovesUser(): void {
   currentLocation.x = checkXIsOk(currentLocation.x);
   currentLocation.y = checkYIsOk(currentLocation.y);
   while (
-    allCaves[currentLocation.x][currentLocation.y].containsBat
-   || allCaves[currentLocation.x][currentLocation.y].containsTrap
-   || allCaves[currentLocation.x][currentLocation.y].containsWumpus
+    allCaves[currentLocation.x][currentLocation.y].containsBat ||
+    allCaves[currentLocation.x][currentLocation.y].containsTrap ||
+    allCaves[currentLocation.x][currentLocation.y].containsWumpus
   ) {
     currentLocation.x += getRandomInt(4);
     currentLocation.y += getRandomInt(4);
@@ -392,27 +394,39 @@ function startGame(): void {
   mainTextArea.innerHTML = `<span> Great! 
   What would you like your character to be called? <br> Press "Enter" to continue </span>`;
   userTextInput.classList.toggle('hidden');
+  document.querySelector('#startBtn')?.classList.add('hidden');
 }
 
 function flyingArrow(direction: number) {
   let arrowLocationX = currentLocation.x; // TODO: Copy the obect to one variable instead?
   let arrowLocationY = currentLocation.y;
   userArrowCounter -= 1;
-  for (let i = 0; i < 3; i++) {
-    arrowLocationX += nextRooms[direction].x;
-    arrowLocationY += nextRooms[direction].y;
-    arrowLocationX = checkXIsOk(arrowLocationX);
-    arrowLocationY = checkYIsOk(arrowLocationY);
-    if (allCaves[arrowLocationX][arrowLocationY].containsWumpus) {
-      // TODO: Display victory screen
-      console.log('<br> <br> Wumpus has been hit');
-      return;
-    } if (arrowLocationX === currentLocation.x && arrowLocationY === currentLocation.y) {
-      gameOver('shot himself with an arrow');
-      console.log('You killed yourself');
-      return;
+  const timer = ms => new Promise(res => setTimeout(res, ms));
+  async function load():Promise<void> {
+    // I use async to create a promise to slow down the loop, so the arrow img can be seen
+    for (let i = 0; i < 3; i++) {
+      arrowLocationX += nextRooms[direction].x;
+      arrowLocationY += nextRooms[direction].y;
+      arrowLocationX = checkXIsOk(arrowLocationX);
+      arrowLocationY = checkYIsOk(arrowLocationY);
+      ctx.drawImage(arrowImg, arrowLocationX * 60, arrowLocationY * 50, 35, 35);
+      if (allCaves[arrowLocationX][arrowLocationY].containsWumpus) {
+        // TODO: Display victory screen
+        console.log('<br> <br> Wumpus has been hit');
+        return;
+      }
+      if (arrowLocationX === currentLocation.x && arrowLocationY === currentLocation.y) {
+        gameOver('shot himself with an arrow');
+        console.log('You killed yourself');
+        return;
+      }
+      // eslint-disable-next-line no-await-in-loop
+      await timer(800);
+      ctx.clearRect(arrowLocationX * 60, arrowLocationY * 50, 55, 45);
     }
   }
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  load();
   mainTextArea.innerHTML += '<br> <br> It appears the arrow did not hit anything...';
 }
 
@@ -446,7 +460,7 @@ function shootArrow(value: string): void {
 
 function movement(value: string): void {
   let errorTriggerd = false;
-  
+
   switch (value.toLowerCase()) {
     case 'n':
     case 'north':
@@ -485,17 +499,21 @@ function movement(value: string): void {
     displayRoom(currentLocation.x, currentLocation.y);
   }
 }
-function handleUserImg(reason:string) {
+function handleUserImg(reason: string) {
   if (canvas.getContext) {
-  switch (reason) {
-    case 'clear': 
-     ctx.clearRect(currentLocation.x * 60, currentLocation.y * 50, 55, 45);
-    break;
-    case 'show':
-      ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
-    break;
-    case 'bat':
-      //TODO: Rotate the img a few turn incase the player meets a bat.
+    switch (reason) {
+      case 'clear':
+        ctx.clearRect(currentLocation.x * 60, currentLocation.y * 50, 55, 45);
+        break;
+      case 'show':
+        ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
+        break;
+      case 'bat':
+        // TODO: Rotate the img a few turn incase the player meets a bat.
+        break;
+      default:
+        console.error('handleUserImg function param');
+        break;
     }
   }
 }
@@ -510,10 +528,9 @@ function canvasRooms(): void {
         ctx.clearRect(row * 60, col * 50, 55, 45);
       }
     }
- }
-  else {
-    console.error('canvas is not supported');
-    //TODO: Backup image, incase canvas is not supported.
+  } else {
+    console.error('Canvas is not supported');
+    canvas.classList.add('hidden');
   }
 }
 
@@ -554,7 +571,6 @@ function textInputEHandler(e: KeyboardEvent): void {
     userTextInput.value = '';
   }
 }
-
 
 userTextInput.addEventListener('keypress', textInputEHandler);
 document.querySelector('#startBtn')?.addEventListener('click', startGame);

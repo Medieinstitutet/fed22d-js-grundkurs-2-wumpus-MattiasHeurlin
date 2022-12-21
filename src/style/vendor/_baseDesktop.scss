@@ -24,20 +24,24 @@ main {
   display: grid;
   grid-template-columns: 0.5fr 1fr 0.5fr;
   grid-template-rows: 1fr 1fr;
-  grid-template-areas: 
-  ". textDisplay ."
-  ". canvasDisplay .";
+  grid-template-areas:
+    '. textDisplay .'
+    '. canvasDisplay .';
   padding: 50px;
-  gap: 30px;
+  gap: 35px;
 }
 
 canvas {
   grid-area: canvasDisplay;
-  background-color: white;
+  background-color: #440163;
+  margin: 0 auto;
   width: 800px;
   height: 350px;
   border: 20px solid rgb(46, 8, 46);
   border-radius: 10px;
+  -webkit-box-shadow: 0px 0px 43px 10px rgba(150, 36, 181, 0.9);
+  -moz-box-shadow: 0px 0px 43px 10px rgba(150, 36, 181, 0.9);
+  box-shadow: 0px 0px 43px 10px rgba(150, 36, 181, 0.9);
 }
 
 #startBtn {
@@ -64,18 +68,15 @@ canvas {
 section {
   position: relative;
   grid-area: textDisplay;
-  width: 800px;
+  width: 1000px;
   height: 350px;
   padding: 20px;
-  background-color: #431c55;
+  background-color: #440163;
   border: 20px solid rgb(46, 8, 46);
   border-radius: 10px;
-  -webkit-box-shadow:0px 0px 43px 10px rgba(150,36,181,0.9);
-  -moz-box-shadow: 0px 0px 43px 10px rgba(150,36,181,0.9);
-  box-shadow: 0px 0px 43px 10px rgba(150,36,181,0.9);
-
-  
-
+  -webkit-box-shadow: 0px 0px 43px 10px rgba(150, 36, 181, 0.9);
+  -moz-box-shadow: 0px 0px 43px 10px rgba(150, 36, 181, 0.9);
+  box-shadow: 0px 0px 43px 10px rgba(150, 36, 181, 0.9);
 }
 
 #gameOver {
@@ -85,6 +86,3 @@ section {
     height: 60px;
   }
 }
-
-
-
