@@ -189,9 +189,9 @@ function placeTraps(): void {
     let random2: number = getRandomInt(4);
     while (
       ((random1 === 0 && random2 === 0) ||
-        allCaves[random1][random2].containsTrap
-      || allCaves[random1][random2].containsBat)
-      && tries < 20
+        allCaves[random1][random2].containsTrap ||
+        allCaves[random1][random2].containsBat) &&
+      tries < 20
     ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
@@ -212,9 +212,9 @@ function placeBats(): void {
     let random2: number = getRandomInt(4);
     while (
       ((random1 === 0 && random2 === 0) ||
-        allCaves[random1][random2].containsTrap
-       || allCaves[random1][random2].containsBat)
-      && tries < 20
+        allCaves[random1][random2].containsTrap ||
+        allCaves[random1][random2].containsBat) &&
+      tries < 20
     ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
@@ -318,13 +318,14 @@ function fullReset(): void {
   startGame();
 }
 
-function calcUserScore():void {
-  const newUserScore = {name: userName, score: userArrowCounter};
+function calcUserScore(): void {
+  const newUserScore = { name: userName, score: userArrowCounter };
   highScoreList.push(newUserScore);
 }
 
-function gameOver(win:boolean, reason: string) {
-  if (win) { // Only includes the player score if the play won.
+function gameOver(win: boolean, reason: string) {
+  if (win) {
+    // Only includes the player score if the play won.
     calcUserScore();
   }
   console.log('Gameover screen triggerd');
@@ -340,8 +341,8 @@ function gameOver(win:boolean, reason: string) {
   ${userName} ${reason}
   <br> <br> Highscore list:
     <ul> `;
-  highScoreList.forEach((user) => {
-    gameOverScreen.innerHTML += `<li> ${user.name}: ${user.score} </li>`
+  highScoreList.forEach(user => {
+    gameOverScreen.innerHTML += `<li> ${user.name}: ${user.score} </li>`;
   });
   gameOverScreen.innerHTML += `</ul> 
   <button id="restartBtn">Restart Game?</button>`;
@@ -420,7 +421,7 @@ function flyingArrow(direction: number) {
   let arrowLocationY = currentLocation.y;
   userArrowCounter -= 1;
   const timer = ms => new Promise(res => setTimeout(res, ms));
-  async function load():Promise<void> {
+  async function load(): Promise<void> {
     // I use async to create a promise to slow down the loop, so the arrow img can be seen
     for (let i = 0; i < 3; i++) {
       arrowLocationX += nextRooms[direction].x;
@@ -533,9 +534,6 @@ function handleUserImg(reason: string) {
       case 'show':
         ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
         break;
-      case 'bat':
-        // TODO: Rotate the img a few turn incase the player meets a bat.
-        break;
       default:
         console.error('handleUserImg function param');
         break;
@@ -554,7 +552,6 @@ function canvasRooms(): void {
         ctx.clearRect(row * 60, col * 50, 55, 45);
       }
     }
-    // ctx.drawImage(backgroundImageTest, 0, 0, 300, 300);
   } else {
     console.error('Canvas is not supported');
     canvas.classList.add('hidden');
@@ -576,14 +573,14 @@ function textInputEHandler(e: KeyboardEvent): void {
       <br> North / South / West / East <br> <br>
       If you wish to shoot your bow, insert "Shoot" and the direction. <br> <br>
       Press Enter again to enter the first cave;`;
-    };
+    }
     if (enterCounter === 1) {
-      displayRoom(0, 0);
+      displayRoom(0,0);
       mainStage.classList.add('turned-on');
       canvas.classList.remove('hidden');
-      ctx.clearRect(0, 0, 300, 200); // Draws "acess granted", then clears and places img of player. 
+      ctx.clearRect(0, 0, 300, 200); // Draws "acess granted", then clears and places img of player.
       ctx.drawImage(backgroundImage, 0, 0, 300, 200);
-      setTimeout( () => {
+      setTimeout(() => {
         canvasRooms();
         handleUserImg('show');
       }, 1500);
