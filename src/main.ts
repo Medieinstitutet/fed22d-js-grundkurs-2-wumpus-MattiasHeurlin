@@ -12,6 +12,8 @@ const userCharImage = new Image();
 userCharImage.src = 'src/style/vendor/images/adventure.png';
 const arrowImg = new Image();
 arrowImg.src = 'src/style/vendor/images/arrow.png';
+const backgroundImage = new Image(); // FIXME: Just a test replace this
+backgroundImage.src = 'src/style/vendor/images/acessgranted.png';
 // eslint-disable-next-line prefer-const
 let highScoreList = [
   {
@@ -416,7 +418,6 @@ function startGame(): void {
 function flyingArrow(direction: number) {
   let arrowLocationX = currentLocation.x;
   let arrowLocationY = currentLocation.y;
-  let wumpusGotHit = false;
   userArrowCounter -= 1;
   const timer = ms => new Promise(res => setTimeout(res, ms));
   async function load():Promise<void> {
@@ -446,13 +447,9 @@ function flyingArrow(direction: number) {
   }
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   load();
-  if (wumpusGotHit) {
-    return;
+  if (!mainTextArea.innerHTML.includes('It appears the arrow did not hit anything')) {
+    mainTextArea.innerHTML += '<br> <br> It appears the arrow did not hit anything...';
   }
-  if (mainTextArea.innerHTML.includes('It appears the arrow did not hit anything')) {
-    return; // If it is aleardy currently showing.
-  }
-  mainTextArea.innerHTML += '<br> <br> It appears the arrow did not hit anything...';
 }
 
 function shootArrow(value: string): void {
@@ -548,14 +545,16 @@ function handleUserImg(reason: string) {
 
 function canvasRooms(): void {
   if (canvas.getContext) {
+    console.log(canvas);
     ctx = canvas.getContext('2d');
     for (let row = 0; row < allCaves.length; row++) {
       for (let col = 0; col < allCaves[row].length; col++) {
-        ctx.fillStyle = 'rgb(45, 0, 45)';
+        ctx.fillStyle = 'rgb(9, 10, 41)';
         ctx.fillRect(row * 60, col * 50, 60, 50);
         ctx.clearRect(row * 60, col * 50, 55, 45);
       }
     }
+    // ctx.drawImage(backgroundImageTest, 0, 0, 300, 300);
   } else {
     console.error('Canvas is not supported');
     canvas.classList.add('hidden');
@@ -566,29 +565,34 @@ function textInputEHandler(e: KeyboardEvent): void {
   if (e.key === 'Enter') {
     if (enterCounter === 0) {
       // Första gången man startar och trycker enter så anges detta
-      userTextInput.classList.add('hidden');
       userName = userTextInput.value;
       mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
       castle of Greveholm. 
       Afraid to be alone? Lucky for you, you are not. There is also a beast by the name of Wumpus in the
       treturous cave system. Your goal is to slay Wumpus before he kills you. There is loot you can find along 
-      the way to aid you, if you find it. Currently you only have a bow and three arrows.`;
-      setTimeout(() => {
-        userTextInput.classList.remove('hidden');
-        mainTextArea.innerHTML = `You navigate using the field below. 
-        Simply put in the direktion you would like to go in. <br> <br> Either using full names or the first letter.
-        <br> North / South / West / East <br> <br>
-        If you wish to shoot your bow, insert "Shoot" and the direction. <br> <br>
-        Press Enter again to enter the first cave;`;
-      }, 5000);
-    }
+      the way to aid you, if you find it. Currently you only have a bow and three arrows.
+      You navigate using the field below. 
+      Simply put in the direktion you would like to go in. <br> <br> Either using full names or the first letter.
+      <br> North / South / West / East <br> <br>
+      If you wish to shoot your bow, insert "Shoot" and the direction. <br> <br>
+      Press Enter again to enter the first cave;`;
+    };
     if (enterCounter === 1) {
       displayRoom(0, 0);
+      mainStage.classList.add('turned-on');
+      canvas.classList.remove('hidden');
+      ctx.clearRect(0, 0, 300, 200); // Draws "acess granted", then clears and places img of player. 
+      ctx.drawImage(backgroundImage, 0, 0, 300, 200);
+      setTimeout( () => {
+        canvasRooms();
+        handleUserImg('show');
+      }, 1500);
     }
     if (enterCounter > 1) {
       // Sköter all hantering efter spelet har kommit igång
       if (userTextInput.value.toLowerCase().includes('shoot')) {
         shootArrow(userTextInput.value);
+        userTextInput.value = '';
         return;
       }
       handleUserImg('clear');
