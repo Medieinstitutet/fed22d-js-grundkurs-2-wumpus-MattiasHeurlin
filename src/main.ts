@@ -12,10 +12,11 @@ const userCharImage = new Image();
 userCharImage.src = 'src/style/vendor/images/adventure.png';
 const arrowImg = new Image();
 arrowImg.src = 'src/style/vendor/images/arrow.png';
-const backgroundImage = new Image(); // FIXME: Just a test replace this
+const backgroundImage = new Image();
 backgroundImage.src = 'src/style/vendor/images/acessgranted.png';
-// eslint-disable-next-line prefer-const
-let highScoreList = [
+const endlessHoleImage = new Image();
+endlessHoleImage.src = 'src/style/vendor/images/endlesshole.jpg';
+const highScoreList = [
   {
     name: 'Mattias',
     score: 10,
@@ -28,15 +29,16 @@ const nextRooms = [
   { x: 1, y: 0 }, // E
 ];
 let userName = '';
-// eslint-disable-next-line prefer-const
-let currentLocation = {
+const currentLocation = {
   x: 0,
   y: 0,
 };
 let wumpusCurrentLocation: any;
 let enterCounter = 0;
 let userArrowCounter = 3;
-let userPointCounter = 0;
+let userPointCounter = 10; // Man startar med 10 poäng
+let userHasCoin = false;
+
 interface CaveRooms {
   containsWumpus: boolean;
   containsItem: string[];
@@ -44,9 +46,8 @@ interface CaveRooms {
   containsBat: boolean;
 }
 
-const allCaves /*: CaveRooms - FIXME: */ = [
+const allCaves: CaveRooms[][] = [
   [
-    // TODO: compress this declaration
     {
       containsWumpus: false,
       containsItem: [],
@@ -182,6 +183,39 @@ function getRandomInt(max: number): number {
   return Math.floor(Math.random() * max);
 }
 
+function placeItems(): void {
+  for (let i = 0; i < 5; i++) {
+    let tries = 0;
+    let random1: number = getRandomInt(5);
+    let random2: number = getRandomInt(4);
+    while (
+      ((random1 === 0 && random2 === 0) ||
+        allCaves[random1][random2].containsTrap ||
+        allCaves[random1][random2].containsWumpus ||
+        allCaves[random1][random2].containsItem.length > 0 ||
+        allCaves[random1][random2].containsBat) &&
+      tries < 20
+    ) {
+      random1 = getRandomInt(5);
+      random2 = getRandomInt(4);
+      tries += 1;
+      if (tries === 19) {
+        console.error('Unable to place all items.');
+      }
+    }
+    if (i < 2) {
+      allCaves[random1][random2].containsItem.push('bonusItem');
+    }
+    if (i < 4) {
+      allCaves[random1][random2].containsItem.push('arrowItem');
+    }
+    if (i === 4) {
+      allCaves[random1][random2].containsItem.push('coinItem');
+    }
+    console.log(`Items have been placed: ${i}: ${random1}:${random2}`);
+  }
+}
+
 function placeTraps(): void {
   for (let i = 0; i < 4; i++) {
     let tries = 0;
@@ -244,6 +278,7 @@ function cavesPlaceEverything(): void {
   placeWumpus();
   placeTraps();
   placeBats();
+  placeItems();
 }
 
 function checkXIsOk(x: number) {
@@ -303,6 +338,7 @@ function fullReset(): void {
       allCaves[i][j].containsBat = false;
       allCaves[i][j].containsTrap = false;
       allCaves[i][j].containsWumpus = false;
+      allCaves[i][j].containsItem.length = 0;
     }
   }
   cavesPlaceEverything();
@@ -315,6 +351,7 @@ function fullReset(): void {
   gameOverScreen.classList.add('hidden');
   enterCounter = 1; // so the player wont need to read all the text again
   userTextInput.value = '';
+  userHasCoin = false;
   startGame();
 }
 
@@ -351,7 +388,6 @@ function gameOver(win: boolean, reason: string) {
 
 function displayRoom(i: number, j: number) {
   /** TODO:
-   * Slumpa fram svar på olika situationer inom samma parameter
    * animera utskriften, all text ska inte komma samtidigt.
    */
   errorMsg.innerHTML = '';
@@ -364,22 +400,67 @@ function displayRoom(i: number, j: number) {
     }, 3000);
   } else if (allCaves[i][j].containsTrap) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant hole in the middle. <br> 
-    <br> You easily go around the hole and as you are in the clear. 
-    <br> A stone falls down and kills you`;
+    <br> You easily go around the hole and as you are almost in the clear. 
+    <br> You slip and fall into the hole.`;
+    if (userHasCoin) {
+      mainTextArea.innerHTML += `<br> <br> After falling for two minutes you feel your right pocket heat up. 
+      As you put your hand in the pocket and feel the burning hot coin you blink and you 
+      find your self back in the cave again. <br> <br>
+      Where would you like to go next? N/S/W/E`;
+      return;
+    }
     setTimeout(() => {
-      gameOver(false, 'was killed due to head trauma');
+      ctx.drawImage(endlessHoleImage, 0, 0, 300, 200);
+      gameOver(false, 'fell into endless hole');
     }, 3000);
   } else if (allCaves[i][j].containsWumpus) {
     mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
     <br> A movement deep in the dark is the last thing you see before you are slayed.`;
+    if (userHasCoin) {
+      mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
+      <br> A movement deep in the dark is the last thing you see before 
+      the coin in your pocket bursts and you find your self in a new cave. <br> <br>`;
+      currentLocation.x = getRandomInt(5);
+      currentLocation.y = getRandomInt(4);
+      while (
+        allCaves[currentLocation.x][currentLocation.y].containsTrap ||
+        allCaves[currentLocation.x][currentLocation.y].containsWumpus ||
+        allCaves[currentLocation.x][currentLocation.y].containsItem.length > 0 ||
+        allCaves[currentLocation.x][currentLocation.y].containsBat
+      ) {
+        currentLocation.x = getRandomInt(5);
+        currentLocation.y = getRandomInt(4);
+      }
+      displayRoom(currentLocation.x, currentLocation.y);
+      return;
+    }
     setTimeout(() => {
       gameOver(false, 'was eaten by the Wumpus');
     }, 3000);
   } else {
-    mainTextArea.innerHTML = `You have entered a new cave. x:${i} y:${j}<br>`;
+    mainTextArea.innerHTML = 'You have entered a new cave. <br>';
     handleUserImg('show');
     checkNearbyRoom();
-    mainTextArea.innerHTML += 'Where would you like to go next? N/S/W/E';
+    if (allCaves[i][j].containsItem.length > 0) {
+      switch (allCaves[i][j].containsItem[0]) {
+        case 'bonusItem':
+          mainTextArea.innerHTML += 'I find a chest with valuables inside... (Bonus Point)';
+          userPointCounter += 3;
+          break;
+        case 'arrowItem':
+          mainTextArea.innerHTML += 'I find two arrows on a table inside... (Two Arrows Added)';
+          userArrowCounter += 2;
+          break;
+        case 'coin':
+          mainTextArea.innerHTML += `On a table in the corner of the cave 
+          there is a single gold coin... (Strange Coin Added)`;
+          userHasCoin = true;
+          break;
+        default:
+          break;
+      }
+    }
+    mainTextArea.innerHTML += '<br> <br> Where would you like to go next? N/S/W/E';
   }
 }
 
@@ -486,7 +567,7 @@ function shootArrow(value: string): void {
 
 function movement(value: string): void {
   let errorTriggerd = false;
-  userPointCounter += 1;
+  userPointCounter -= 1;
   switch (value.toLowerCase()) {
     case 'n':
     case 'north':
@@ -575,7 +656,7 @@ function textInputEHandler(e: KeyboardEvent): void {
       Press Enter again to enter the first cave;`;
     }
     if (enterCounter === 1) {
-      displayRoom(0,0);
+      displayRoom(0, 0);
       mainStage.classList.add('turned-on');
       canvas.classList.remove('hidden');
       ctx.clearRect(0, 0, 300, 200); // Draws "acess granted", then clears and places img of player.
