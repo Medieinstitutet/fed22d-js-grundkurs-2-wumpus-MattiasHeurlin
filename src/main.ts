@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import './style/style.scss';
 
@@ -19,7 +22,7 @@ endlessHoleImage.src = 'src/style/vendor/images/endlesshole.jpg';
 const highScoreList = [
   {
     name: 'Mattias',
-    score: 10,
+    score: 13,
   },
 ];
 const nextRooms = [
@@ -189,12 +192,12 @@ function placeItems(): void {
     let random1: number = getRandomInt(5);
     let random2: number = getRandomInt(4);
     while (
-      ((random1 === 0 && random2 === 0) ||
-        allCaves[random1][random2].containsTrap ||
-        allCaves[random1][random2].containsWumpus ||
-        allCaves[random1][random2].containsItem.length > 0 ||
-        allCaves[random1][random2].containsBat) &&
-      tries < 20
+      ((random1 === 0 && random2 === 0)
+       || allCaves[random1][random2].containsTrap
+       || allCaves[random1][random2].containsWumpus
+       || allCaves[random1][random2].containsItem.length > 0
+       || allCaves[random1][random2].containsBat)
+      && tries < 20
     ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
@@ -222,10 +225,10 @@ function placeTraps(): void {
     let random1: number = getRandomInt(5);
     let random2: number = getRandomInt(4);
     while (
-      ((random1 === 0 && random2 === 0) ||
-        allCaves[random1][random2].containsTrap ||
-        allCaves[random1][random2].containsBat) &&
-      tries < 20
+      ((random1 === 0 && random2 === 0)
+        || allCaves[random1][random2].containsTrap
+        || allCaves[random1][random2].containsBat)
+      && tries < 20
     ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
@@ -245,10 +248,10 @@ function placeBats(): void {
     let random1: number = getRandomInt(5);
     let random2: number = getRandomInt(4);
     while (
-      ((random1 === 0 && random2 === 0) ||
-        allCaves[random1][random2].containsTrap ||
-        allCaves[random1][random2].containsBat) &&
-      tries < 20
+      ((random1 === 0 && random2 === 0)
+       || allCaves[random1][random2].containsTrap
+       || allCaves[random1][random2].containsBat)
+      && tries < 20
     ) {
       random1 = getRandomInt(5);
       random2 = getRandomInt(4);
@@ -301,7 +304,7 @@ function checkYIsOk(y: number) {
 }
 
 function checkNearbyRoom() {
-  let alreadyTriggerd = {
+  const alreadyTriggerd = {
     bats: false,
     traps: false,
     wumpus: false,
@@ -347,7 +350,7 @@ function fullReset(): void {
   currentLocation.x = 0;
   currentLocation.y = 0;
   userName = '';
-  userPointCounter = '';
+  userPointCounter = 0;
   gameOverScreen.classList.add('hidden');
   enterCounter = 1; // so the player wont need to read all the text again
   userTextInput.value = '';
@@ -356,7 +359,7 @@ function fullReset(): void {
 }
 
 function calcUserScore(): void {
-  const newUserScore = { name: userName, score: userArrowCounter };
+  const newUserScore = { name: userName, score: userPointCounter };
   highScoreList.push(newUserScore);
 }
 
@@ -378,7 +381,7 @@ function gameOver(win: boolean, reason: string) {
   ${userName} ${reason}
   <br> <br> Highscore list:
     <ul> `;
-  highScoreList.forEach(user => {
+  highScoreList.forEach((user) => {
     gameOverScreen.innerHTML += `<li> ${user.name}: ${user.score} </li>`;
   });
   gameOverScreen.innerHTML += `</ul> 
@@ -410,6 +413,7 @@ function displayRoom(i: number, j: number) {
       return;
     }
     setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       ctx.drawImage(endlessHoleImage, 0, 0, 300, 200);
       gameOver(false, 'fell into endless hole');
     }, 3000);
@@ -423,10 +427,10 @@ function displayRoom(i: number, j: number) {
       currentLocation.x = getRandomInt(5);
       currentLocation.y = getRandomInt(4);
       while (
-        allCaves[currentLocation.x][currentLocation.y].containsTrap ||
-        allCaves[currentLocation.x][currentLocation.y].containsWumpus ||
-        allCaves[currentLocation.x][currentLocation.y].containsItem.length > 0 ||
-        allCaves[currentLocation.x][currentLocation.y].containsBat
+        allCaves[currentLocation.x][currentLocation.y].containsTrap
+       || allCaves[currentLocation.x][currentLocation.y].containsWumpus
+       || allCaves[currentLocation.x][currentLocation.y].containsItem.length > 0
+       || allCaves[currentLocation.x][currentLocation.y].containsBat
       ) {
         currentLocation.x = getRandomInt(5);
         currentLocation.y = getRandomInt(4);
@@ -444,15 +448,15 @@ function displayRoom(i: number, j: number) {
     if (allCaves[i][j].containsItem.length > 0) {
       switch (allCaves[i][j].containsItem[0]) {
         case 'bonusItem':
-          mainTextArea.innerHTML += 'I find a chest with valuables inside... (Bonus Point)';
+          mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
           userPointCounter += 3;
           break;
         case 'arrowItem':
-          mainTextArea.innerHTML += 'I find two arrows on a table inside... (Two Arrows Added)';
+          mainTextArea.innerHTML += '<br> I find two arrows on a table inside... (Two Arrows Added)';
           userArrowCounter += 2;
           break;
         case 'coin':
-          mainTextArea.innerHTML += `On a table in the corner of the cave 
+          mainTextArea.innerHTML += `<br> On a table in the corner of the cave 
           there is a single gold coin... (Strange Coin Added)`;
           userHasCoin = true;
           break;
@@ -475,9 +479,9 @@ function batMovesUser(): void {
   currentLocation.x = checkXIsOk(currentLocation.x);
   currentLocation.y = checkYIsOk(currentLocation.y);
   while (
-    allCaves[currentLocation.x][currentLocation.y].containsBat ||
-    allCaves[currentLocation.x][currentLocation.y].containsTrap ||
-    allCaves[currentLocation.x][currentLocation.y].containsWumpus
+    allCaves[currentLocation.x][currentLocation.y].containsBat
+    || allCaves[currentLocation.x][currentLocation.y].containsTrap
+    || allCaves[currentLocation.x][currentLocation.y].containsWumpus
   ) {
     currentLocation.x += getRandomInt(4);
     currentLocation.y += getRandomInt(4);
@@ -501,7 +505,8 @@ function flyingArrow(direction: number) {
   let arrowLocationX = currentLocation.x;
   let arrowLocationY = currentLocation.y;
   userArrowCounter -= 1;
-  const timer = ms => new Promise(res => setTimeout(res, ms));
+  // eslint-disable-next-line no-promise-executor-return
+  const timer = (ms: number) => new Promise((res) => setTimeout(res, ms));
   async function load(): Promise<void> {
     // I use async to create a promise to slow down the loop, so the arrow img can be seen
     for (let i = 0; i < 3; i++) {
@@ -512,14 +517,11 @@ function flyingArrow(direction: number) {
       ctx.drawImage(arrowImg, arrowLocationX * 60, arrowLocationY * 50, 35, 35);
       if (allCaves[arrowLocationX][arrowLocationY].containsWumpus) {
         gameOver(true, 'has slain the Wumpus');
-        console.log('<br> <br> Wumpus has been hit');
         i = 3;
-        wumpusGotHit = true;
         return;
       }
       if (arrowLocationX === currentLocation.x && arrowLocationY === currentLocation.y) {
         gameOver(false, 'shot himself with an arrow');
-        console.log('You killed yourself');
         return;
       }
       // eslint-disable-next-line no-await-in-loop
@@ -607,18 +609,16 @@ function movement(value: string): void {
   }
 }
 function handleUserImg(reason: string) {
-  if (canvas.getContext) {
-    switch (reason) {
-      case 'clear':
-        ctx.clearRect(currentLocation.x * 60, currentLocation.y * 50, 55, 45);
-        break;
-      case 'show':
-        ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
-        break;
-      default:
-        console.error('handleUserImg function param');
-        break;
-    }
+  switch (reason) {
+    case 'clear':
+      ctx.clearRect(currentLocation.x * 60, currentLocation.y * 50, 55, 45);
+      break;
+    case 'show':
+      ctx.drawImage(userCharImage, currentLocation.x * 60, currentLocation.y * 50, 40, 40);
+      break;
+    default:
+      console.error('handleUserImg function param');
+      break;
   }
 }
 
