@@ -501,7 +501,7 @@ function flyingArrow(direction: number) {
   userArrowCounter -= 1;
   // eslint-disable-next-line no-promise-executor-return
   const timer = (ms: number) => new Promise((res) => setTimeout(res, ms));
-  async function load(): Promise<void> {
+  async function load(): Promise<void> { 
     // I use async to create a promise to slow down the loop, so the arrow img can be seen
     for (let i = 0; i < 3; i++) {
       arrowLocationX += nextRooms[direction].x;
@@ -602,6 +602,7 @@ function movement(value: string): void {
     displayRoom(currentLocation.x, currentLocation.y);
   }
 }
+
 function handleUserImg(reason: string) {
   switch (reason) {
     case 'clear':
