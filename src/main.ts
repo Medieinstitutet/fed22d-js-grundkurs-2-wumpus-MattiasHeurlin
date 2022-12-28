@@ -39,7 +39,7 @@ const currentLocation = {
 let wumpusCurrentLocation: any;
 let enterCounter = 0;
 let userArrowCounter = 3;
-let userPointCounter = 10; // Man startar med 10 poäng
+let userPointCounter = 10; // User starts at 10 points
 let userHasCoin = false;
 
 interface CaveRooms {
@@ -292,7 +292,7 @@ function checkXIsOk(x: number) {
     x = 0;
   }
   return x;
-}
+} // Checks if x and y is within the parameters of the allCaves array
 function checkYIsOk(y: number) {
   if (y < 0) {
     y = 3;
@@ -309,10 +309,10 @@ function checkNearbyRoom() {
     traps: false,
     wumpus: false,
   };
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 4; i++) { // Checks nearby rums
     let tempX: number = currentLocation.x + nextRooms[i].x;
     let tempY: number = currentLocation.y + nextRooms[i].y;
-    tempX = checkXIsOk(tempX); // Kollar igenom grann rum.
+    tempX = checkXIsOk(tempX);
     tempY = checkYIsOk(tempY);
     if (allCaves[tempX][tempY].containsBat && !alreadyTriggerd.bats) {
       mainTextArea.innerHTML += '<br> I hear the menacing sounds of bats nearby... <br>';
@@ -371,7 +371,6 @@ function gameOver(win: boolean, reason: string) {
   console.log('Gameover screen triggerd');
   gameOverScreen.classList.remove('hidden');
   userTextInput.classList.add('hidden');
-  mainTextArea.innerHTML = '';
   if (!win) {
     gameOverScreen.innerHTML = 'GAME OVER <br> <br>';
   } else {
@@ -387,12 +386,10 @@ function gameOver(win: boolean, reason: string) {
   gameOverScreen.innerHTML += `</ul> 
   <button id="restartBtn">Restart Game?</button>`;
   document.querySelector('#restartBtn')?.addEventListener('click', fullReset);
+  mainTextArea.innerHTML = '';
 }
 
-function displayRoom(i: number, j: number) {
-  /** TODO:
-   * animera utskriften, all text ska inte komma samtidigt.
-   */
+function displayRoom(i: number, j: number) { // Checks the rum for its properties,
   errorMsg.innerHTML = '';
   if (allCaves[i][j].containsBat) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant bat flying straight at you! <br> 
@@ -429,12 +426,12 @@ function displayRoom(i: number, j: number) {
       while (
         allCaves[currentLocation.x][currentLocation.y].containsTrap
        || allCaves[currentLocation.x][currentLocation.y].containsWumpus
-       || allCaves[currentLocation.x][currentLocation.y].containsItem.length > 0
        || allCaves[currentLocation.x][currentLocation.y].containsBat
       ) {
         currentLocation.x = getRandomInt(5);
         currentLocation.y = getRandomInt(4);
       }
+      userHasCoin = false;
       displayRoom(currentLocation.x, currentLocation.y);
       return;
     }
@@ -446,26 +443,23 @@ function displayRoom(i: number, j: number) {
     handleUserImg('show');
     checkNearbyRoom();
     if (allCaves[i][j].containsItem.length > 0) {
-      switch (allCaves[i][j].containsItem[0]) {
-        case 'bonusItem':
-          mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
-          userPointCounter += 3;
-          break;
-        case 'arrowItem':
-          mainTextArea.innerHTML += '<br> I find two arrows on a table inside... (Two Arrows Added)';
-          userArrowCounter += 2;
-          break;
-        case 'coin':
-          mainTextArea.innerHTML += `<br> On a table in the corner of the cave 
-          there is a single gold coin... (Strange Coin Added)`;
-          userHasCoin = true;
-          break;
-        default:
-          break;
+      if (allCaves[i][j].containsItem.includes('bonusItem')) {
+        mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
+        userPointCounter += 3;
       }
+      if (allCaves[i][j].containsItem.includes('arrowItem')) {
+        mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
+        userPointCounter += 3;
+      }
+      if (allCaves[i][j].containsItem.includes('coinItem')) {
+        mainTextArea.innerHTML += `<br> On a table in the corner of the cave 
+          there is a single gold coin... (Strange Coin Added)`;
+        userHasCoin = true;
+      }
+      allCaves[i][j].containsItem = []; // Makes it so the same item cant be picked up twice in the same cave.
     }
-    mainTextArea.innerHTML += '<br> <br> Where would you like to go next? N/S/W/E';
   }
+  mainTextArea.innerHTML += '<br> <br> Where would you like to go next? N/S/W/E';
 }
 
 function batMovesUser(): void {
@@ -647,7 +641,7 @@ function textInputEHandler(e: KeyboardEvent): void {
       mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
       castle of Greveholm. 
       Afraid to be alone? Lucky for you, you are not. There is also a beast by the name of Wumpus in the
-      treturous cave system. Your goal is to slay Wumpus before he kills you. There is loot you can find along 
+      treturous cave system. Your goal is to find and slay the Wumpus. There is loot you can find along 
       the way to aid you, if you find it. Currently you only have a bow and three arrows.
       You navigate using the field below. 
       Simply put in the direktion you would like to go in. <br> <br> Either using full names or the first letter.
@@ -666,8 +660,8 @@ function textInputEHandler(e: KeyboardEvent): void {
         handleUserImg('show');
       }, 1500);
     }
-    if (enterCounter > 1) {
-      // Sköter all hantering efter spelet har kommit igång
+    if (enterCounter > 1) { 
+      // Handles all input after the game has started.
       if (userTextInput.value.toLowerCase().includes('shoot')) {
         shootArrow(userTextInput.value);
         userTextInput.value = '';
