@@ -501,7 +501,7 @@ function flyingArrow(direction: number) {
   userArrowCounter -= 1;
   // eslint-disable-next-line no-promise-executor-return
   const timer = (ms: number) => new Promise((res) => setTimeout(res, ms));
-  async function load(): Promise<void> { 
+  async function load(): Promise<void> {
     // I use async to create a promise to slow down the loop, so the arrow img can be seen
     for (let i = 0; i < 3; i++) {
       arrowLocationX += nextRooms[direction].x;
@@ -637,7 +637,7 @@ function canvasRooms(): void {
 function textInputEHandler(e: KeyboardEvent): void {
   if (e.key === 'Enter') {
     if (enterCounter === 0) {
-      // Första gången man startar och trycker enter så anges detta
+      // First time starting, this is displayed.
       userName = userTextInput.value;
       mainTextArea.innerHTML = `Lets get started ${userName}! <br> <br> You are currently in the caves under the 
       castle of Greveholm. 
@@ -661,7 +661,7 @@ function textInputEHandler(e: KeyboardEvent): void {
         handleUserImg('show');
       }, 1500);
     }
-    if (enterCounter > 1) { 
+    if (enterCounter > 1) {
       // Handles all input after the game has started.
       if (userTextInput.value.toLowerCase().includes('shoot')) {
         shootArrow(userTextInput.value);
