@@ -424,6 +424,7 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
     <br> You easily go around the hole and as you are almost in the clear. <br>
     <br> You slip and fall into the hole.`;
     if (userHasCoin) {
+      userHasCoin = false;
       mainTextArea.innerHTML += `<br> <br> After falling for two minutes you feel your right pocket heat up. 
       As you put your hand in the pocket and feel the burning hot coin you blink and you 
       find your self back in the cave again. <br> <br>
