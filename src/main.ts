@@ -368,6 +368,7 @@ function gameOver(win: boolean, reason: string) {
     // Only includes the player score if the play won.
     calcUserScore();
   }
+  mainTextArea.innerHTML = '';
   console.log('Gameover screen triggerd');
   gameOverScreen.classList.remove('hidden');
   userTextInput.classList.add('hidden');
@@ -386,15 +387,16 @@ function gameOver(win: boolean, reason: string) {
   gameOverScreen.innerHTML += `</ul> 
   <button id="restartBtn">Restart Game?</button>`;
   document.querySelector('#restartBtn')?.addEventListener('click', fullReset);
-  mainTextArea.innerHTML = '';
 }
 
 function displayRoom(i: number, j: number) { // Checks the rum for its properties,
   errorMsg.innerHTML = '';
+  userTextInput.classList.remove('hidden');
   if (allCaves[i][j].containsBat) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant bat flying straight at you! <br> 
     <br> As you try to escape the bat catches you by the leg and flyes away with you. 
     <br> You manage to break free and fall down to a cave nearby.`;
+    userTextInput.classList.add('hidden'); // So the user cant insert any input while flying
     setTimeout(() => {
       batMovesUser();
     }, 3000);
@@ -409,11 +411,13 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
       Where would you like to go next? N/S/W/E`;
       return;
     }
+    userTextInput.classList.add('hidden');
     setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       ctx.drawImage(endlessHoleImage, 0, 0, 300, 200);
       gameOver(false, 'fell into endless hole');
     }, 3000);
+    return;
   } else if (allCaves[i][j].containsWumpus) {
     mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
     <br> A movement deep in the dark is the last thing you see before you are slayed.`;
@@ -435,9 +439,11 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
       displayRoom(currentLocation.x, currentLocation.y);
       return;
     }
+    userTextInput.classList.add('hidden');
     setTimeout(() => {
       gameOver(false, 'was eaten by the Wumpus');
     }, 3000);
+    return;
   } else {
     mainTextArea.innerHTML = 'You have entered a new cave. <br>';
     handleUserImg('show');
