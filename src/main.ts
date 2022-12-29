@@ -576,7 +576,7 @@ function shootArrow(value: string): void {
   if (userArrowCounter === 1 && mainTextArea.innerHTML.includes('VICTORY!')) {
     mainTextArea.innerHTML += '<br> <br> You are down to your last arrow. If you waste it, there is no hope.';
   }
-  if (userArrowCounter === 0 && mainTextArea.innerHTML.includes('VICTORY!')) {
+  if (userArrowCounter === 0) {
     gameOver(false, 'ran out of arrows');
   }
 }
