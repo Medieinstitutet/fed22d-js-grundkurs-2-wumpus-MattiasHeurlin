@@ -365,7 +365,7 @@ function fullReset(): void {
   currentLocation.x = 0;
   currentLocation.y = 0;
   userName = '';
-  userPointCounter = 0;
+  userPointCounter = 10;
   gameOverScreen.classList.add('hidden');
   enterCounter = 1; // so the player wont need to read all the text again
   userTextInput.value = '';
@@ -400,7 +400,7 @@ function gameOver(win: boolean, reason: string) {
     gameOverScreen.innerHTML += `<li> ${user.name}: ${user.score} </li>`;
   });
   gameOverScreen.innerHTML += `</ul> 
-  <button id="restartBtn">Restart Game?</button>`;
+  <button aria-label="press to restart" id="restartBtn">Restart Game?</button>`;
   document.querySelector('#restartBtn')?.addEventListener('click', fullReset);
 }
 
