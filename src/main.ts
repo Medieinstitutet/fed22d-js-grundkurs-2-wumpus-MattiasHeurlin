@@ -272,6 +272,7 @@ function placeBats(): void {
 function placeWumpus(): void {
   let random1: number = getRandomInt(5);
   let random2: number = getRandomInt(4);
+  let tries = 0;
   while (
     ((random1 === 0 && random2 === 0)
      || allCaves[random1][random2].containsTrap
