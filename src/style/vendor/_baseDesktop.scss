@@ -1,0 +1,103 @@
+/* stylelint-disable selector-id-pattern */
+body {
+  font-family: 'Press Start 2P', cursive;
+  color: #58fb00;
+  font-size: 0.9rem;
+  background-color: black;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(100%);
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+main {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding-top: 5%;
+}
+
+canvas {
+  grid-area: canvasDisplay;
+  background-image: url('/newMain.jpg');
+  background-position: center;
+  background-size: cover;
+  margin: 0 auto;
+  width: 90%;
+  max-width: 1200px;
+  height: 40vh;
+  border: 20px solid rgb(9, 10, 41);
+  border-radius: 10px;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-box-shadow: 0 0 59px 5px rgb(77, 78, 120);
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -moz-box-shadow: 0 0 59px 5px rgb(77, 78, 120);
+  box-shadow: 0 0 59px 5px rgb(77, 78, 120);
+}
+
+#startBtn {
+  position: absolute;
+  right: 35px;
+  bottom: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  background-color: red;
+  border: 1px solid darkred;
+  box-shadow: 0 0 15px 5px rgb(255, 14, 1);
+  cursor: pointer;
+}
+
+#userTextInput {
+  margin-top: 20px;
+  background-color: rgb(9, 10, 41);
+  padding: 5px;
+  color: #58fb00;
+  width: 200px;
+  height: 40px;
+}
+
+section {
+  position: relative;
+  margin: 0 auto;
+  background-color: #191919;
+  grid-area: textDisplay;
+  // width: 1200px;
+  min-height: 400px;
+  width: 100%;
+  max-width: 1400px;
+  padding: 20px;
+  border: 20px solid rgb(9, 10, 41);
+  border-radius: 10px;
+}
+
+.turned-on {
+  background-image: url('/newMain.jpg');
+  background-size: 75%;
+  background-position: center;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-box-shadow: 0 0 59 5 rgb(77, 78, 120);
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -moz-box-shadow: 0 0 59 5 rgb(77, 78, 120);
+  box-shadow: 0 0 59 5 rgb(77, 78, 120);
+}
+
+#gameOver {
+  text-align: center;
+  
+  button {
+    width: 200px;
+    height: 60px;
+  }
+}
