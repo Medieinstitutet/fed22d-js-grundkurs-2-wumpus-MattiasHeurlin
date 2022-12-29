@@ -3,6 +3,10 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import './style/style.scss';
+import accessGrantedImp from 'src/style/vendor/images/acessgranted.png';
+import arrowImgImp from 'src/style/vendor/images/arrow.png';
+import UserCharImgImp from 'src/style/vendor/images/adventure.png';
+import EndlessHoleImp from 'src/style/vendor/images/endlesshole.jpg';
 
 const mainStage = document.querySelector('#mainStage') as HTMLElement;
 const mainTextArea = document.querySelector('#mainTextArea') as HTMLElement;
@@ -12,17 +16,17 @@ const gameOverScreen = document.querySelector('#gameOver') as HTMLDivElement;
 const canvas = document.querySelector('#roomCanvas') as HTMLCanvasElement;
 let ctx: any;
 const userCharImage = new Image();
-userCharImage.src = 'src/style/vendor/images/adventure.png';
+userCharImage.src = UserCharImgImp;
 const arrowImg = new Image();
-arrowImg.src = 'src/style/vendor/images/arrow.png';
+arrowImg.src = arrowImgImp;
 const backgroundImage = new Image();
-backgroundImage.src = 'src/style/vendor/images/acessgranted.png';
+backgroundImage.src = accessGrantedImp;
 const endlessHoleImage = new Image();
-endlessHoleImage.src = 'src/style/vendor/images/endlesshole.jpg';
+endlessHoleImage.src = EndlessHoleImp;
 const highScoreList = [
   {
     name: 'Mattias',
-    score: 13,
+    score: 10,
   },
 ];
 const nextRooms = [
@@ -402,7 +406,7 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
     }, 3000);
   } else if (allCaves[i][j].containsTrap) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant hole in the middle. <br> 
-    <br> You easily go around the hole and as you are almost in the clear. 
+    <br> You easily go around the hole and as you are almost in the clear. <br>
     <br> You slip and fall into the hole.`;
     if (userHasCoin) {
       mainTextArea.innerHTML += `<br> <br> After falling for two minutes you feel your right pocket heat up. 
