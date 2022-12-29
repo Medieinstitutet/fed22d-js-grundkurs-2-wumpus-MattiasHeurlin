@@ -30,7 +30,7 @@ main {
 
 canvas {
   grid-area: canvasDisplay;
-  background-image: url('./style/vendor/images/newMain.jpg');
+  background-image: url('./newMain.jpg');
   background-position: center;
   background-size: cover;
   margin: 0 auto;
@@ -83,7 +83,7 @@ section {
 }
 
 .turned-on {
-  background-image: url('./style/vendor/images/newMain.jpg');
+  background-image: url('./newMain.jpg');
   background-size: 75%;
   background-position: center;
   /* stylelint-disable-next-line property-no-vendor-prefix */

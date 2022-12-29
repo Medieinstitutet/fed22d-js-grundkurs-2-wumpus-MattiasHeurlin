@@ -272,9 +272,19 @@ function placeBats(): void {
 function placeWumpus(): void {
   let random1: number = getRandomInt(5);
   let random2: number = getRandomInt(4);
-  while (random1 === 0 && random2 === 0) {
+  while (
+    ((random1 === 0 && random2 === 0)
+     || allCaves[random1][random2].containsTrap
+     || allCaves[random1][random2].containsWumpus
+     || allCaves[random1][random2].containsBat)
+    && tries < 20
+  ) {
     random1 = getRandomInt(5);
     random2 = getRandomInt(4);
+    tries += 1;
+    if (tries === 19) {
+      console.error('Unable to place the Wumpus.');
+    }
   }
   allCaves[random1][random2].containsWumpus = true;
   wumpusCurrentLocation = `Wumpus location: ${random1}, ${random2}`;
@@ -395,16 +405,19 @@ function gameOver(win: boolean, reason: string) {
 
 function displayRoom(i: number, j: number) { // Checks the rum for its properties,
   errorMsg.innerHTML = '';
+  handleUserImg('show');
   userTextInput.classList.remove('hidden');
   if (allCaves[i][j].containsBat) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant bat flying straight at you! <br> 
     <br> As you try to escape the bat catches you by the leg and flyes away with you. 
     <br> You manage to break free and fall down to a cave nearby.`;
     userTextInput.classList.add('hidden'); // So the user cant insert any input while flying
+    handleUserImg('clear');
     setTimeout(() => {
       batMovesUser();
     }, 3000);
-  } else if (allCaves[i][j].containsTrap) {
+    return;
+  } if (allCaves[i][j].containsTrap) {
     mainTextArea.innerHTML = `As you enter the cave you see a giant hole in the middle. <br> 
     <br> You easily go around the hole and as you are almost in the clear. <br>
     <br> You slip and fall into the hole.`;
@@ -415,6 +428,7 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
       Where would you like to go next? N/S/W/E`;
       return;
     }
+    handleUserImg('clear');
     userTextInput.classList.add('hidden');
     setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -422,52 +436,47 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
       gameOver(false, 'fell into endless hole');
     }, 3000);
     return;
-  } else if (allCaves[i][j].containsWumpus) {
+  } if (allCaves[i][j].containsWumpus) {
     mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
     <br> A movement deep in the dark is the last thing you see before you are slayed.`;
     if (userHasCoin) {
+      const tries = 0;
+      allCaves[i][j].containsWumpus = false;
       mainTextArea.innerHTML = `As you enter the cave you you smell the foulest of smells. <br>
       <br> A movement deep in the dark is the last thing you see before 
-      the coin in your pocket bursts and you find your self in a new cave. <br> <br>`;
-      currentLocation.x = getRandomInt(5);
-      currentLocation.y = getRandomInt(4);
-      while (
-        allCaves[currentLocation.x][currentLocation.y].containsTrap
-       || allCaves[currentLocation.x][currentLocation.y].containsWumpus
-       || allCaves[currentLocation.x][currentLocation.y].containsBat
-      ) {
-        currentLocation.x = getRandomInt(5);
-        currentLocation.y = getRandomInt(4);
-      }
+      before the coin in your pocket bursts and the Wumpus vanishes, now he could be anywhere again... <br> <br>`;
+      placeWumpus();
+      while (allCaves[i][j].containsWumpus && tries < 20) {
+        placeWumpus();
+      } // Moves the wumpus to a random room, and removes him from the current room. IF the user has the coin.
       userHasCoin = false;
       displayRoom(currentLocation.x, currentLocation.y);
       return;
     }
+    handleUserImg('clear');
     userTextInput.classList.add('hidden');
     setTimeout(() => {
       gameOver(false, 'was eaten by the Wumpus');
     }, 3000);
     return;
-  } else {
-    mainTextArea.innerHTML = 'You have entered a new cave. <br>';
-    handleUserImg('show');
-    checkNearbyRoom();
-    if (allCaves[i][j].containsItem.length > 0) {
-      if (allCaves[i][j].containsItem.includes('bonusItem')) {
-        mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
-        userPointCounter += 3;
-      }
-      if (allCaves[i][j].containsItem.includes('arrowItem')) {
-        mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
-        userPointCounter += 3;
-      }
-      if (allCaves[i][j].containsItem.includes('coinItem')) {
-        mainTextArea.innerHTML += `<br> On a table in the corner of the cave 
-          there is a single gold coin... (Strange Coin Added)`;
-        userHasCoin = true;
-      }
-      allCaves[i][j].containsItem = []; // Makes it so the same item cant be picked up twice in the same cave.
+  }
+  mainTextArea.innerHTML = 'You have entered a new cave. <br>';
+  checkNearbyRoom();
+  if (allCaves[i][j].containsItem.length > 0) {
+    if (allCaves[i][j].containsItem.includes('bonusItem')) {
+      mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
+      userPointCounter += 3;
     }
+    if (allCaves[i][j].containsItem.includes('arrowItem')) {
+      mainTextArea.innerHTML += '<br> I find a chest with valuables inside... (Bonus Point)';
+      userPointCounter += 3;
+    }
+    if (allCaves[i][j].containsItem.includes('coinItem')) {
+      mainTextArea.innerHTML += `<br> On a table in the corner of the cave 
+          there is a single gold coin... (Strange Coin Added)`;
+      userHasCoin = true;
+    }
+    allCaves[i][j].containsItem = []; // Makes it so the same item cant be picked up twice in the same cave.
   }
   mainTextArea.innerHTML += '<br> <br> Where would you like to go next? N/S/W/E';
 }
@@ -580,25 +589,21 @@ function movement(value: string): void {
       console.log(value);
       currentLocation.x += nextRooms[0].x;
       currentLocation.y += nextRooms[0].y;
-      console.log('N is triggerd');
       break;
     case 's':
     case 'south':
       currentLocation.x += nextRooms[1].x;
       currentLocation.y += nextRooms[1].y;
-      console.log('S is triggerd');
       break;
     case 'w':
     case 'west':
       currentLocation.x += nextRooms[2].x;
       currentLocation.y += nextRooms[2].y;
-      console.log('W is triggerd');
       break;
     case 'e':
     case 'east':
       currentLocation.x += nextRooms[3].x;
       currentLocation.y += nextRooms[3].y;
-      console.log('E is triggerd');
       break;
     default:
       errorMsg.innerHTML = '<br> <br> Wrong input. Use N/S/W/E';
