@@ -3,10 +3,10 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import './style/style.scss';
-import accessGrantedImp from './src/style/vendor/images/acessgranted.png';
-import arrowImgImp from './src/style/vendor/images/arrow.png';
-import UserCharImgImp from './src/style/vendor/images/adventure.png';
-import EndlessHoleImp from './src/style/vendor/images/endlesshole.jpg';
+import accessGrantedImp from './style/vendor/images/acessgranted.png';
+import arrowImgImp from './style/vendor/images/arrow.png';
+import UserCharImgImp from './style/vendor/images/adventure.png';
+import EndlessHoleImp from './style/vendor/images/endlesshole.jpg';
 
 const mainStage = document.querySelector('#mainStage') as HTMLElement;
 const mainTextArea = document.querySelector('#mainTextArea') as HTMLElement;
