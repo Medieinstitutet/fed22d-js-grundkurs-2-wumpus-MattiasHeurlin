@@ -231,7 +231,8 @@ function placeTraps(): void {
     while (
       ((random1 === 0 && random2 === 0)
         || allCaves[random1][random2].containsTrap
-        || allCaves[random1][random2].containsBat)
+        || allCaves[random1][random2].containsBat
+        || allCaves[random1][random2].containsWumpus)
       && tries < 20
     ) {
       random1 = getRandomInt(5);
@@ -254,7 +255,8 @@ function placeBats(): void {
     while (
       ((random1 === 0 && random2 === 0)
        || allCaves[random1][random2].containsTrap
-       || allCaves[random1][random2].containsBat)
+       || allCaves[random1][random2].containsBat
+       || allCaves[random1][random2].containsWumpus)
       && tries < 20
     ) {
       random1 = getRandomInt(5);
@@ -384,7 +386,6 @@ function gameOver(win: boolean, reason: string) {
     calcUserScore();
   }
   mainTextArea.innerHTML = '';
-  console.log('Gameover screen triggerd');
   gameOverScreen.classList.remove('hidden');
   userTextInput.classList.add('hidden');
   if (!win) {
@@ -451,7 +452,9 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
         placeWumpus();
       } // Moves the wumpus to a random room, and removes him from the current room. IF the user has the coin.
       userHasCoin = false;
-      displayRoom(currentLocation.x, currentLocation.y);
+      setTimeout(() => {
+        displayRoom(currentLocation.x, currentLocation.y);
+      }, 3300);
       return;
     }
     handleUserImg('clear');
@@ -484,7 +487,6 @@ function displayRoom(i: number, j: number) { // Checks the rum for its propertie
 
 function batMovesUser(): void {
   const fiftyFifty = getRandomInt(2);
-  console.log('Batmove is triggered');
   if (fiftyFifty === 0) {
     currentLocation.x += getRandomInt(3);
   } else {
@@ -569,7 +571,6 @@ function shootArrow(value: string): void {
       flyingArrow(3);
       break;
     default:
-      console.log(value);
       errorMsg.innerHTML = ' <br> <br> Wrong input. Use "Shoot N/S/W/E"';
       break;
   }
@@ -587,7 +588,6 @@ function movement(value: string): void {
   switch (value.toLowerCase()) {
     case 'n':
     case 'north':
-      console.log(value);
       currentLocation.x += nextRooms[0].x;
       currentLocation.y += nextRooms[0].y;
       break;
@@ -608,7 +608,6 @@ function movement(value: string): void {
       break;
     default:
       errorMsg.innerHTML = '<br> <br> Wrong input. Use N/S/W/E';
-      console.log('default movement');
       errorTriggerd = true;
       break;
   }
@@ -635,7 +634,6 @@ function handleUserImg(reason: string) {
 
 function canvasRooms(): void {
   if (canvas.getContext) {
-    console.log(canvas);
     ctx = canvas.getContext('2d');
     for (let row = 0; row < allCaves.length; row++) {
       for (let col = 0; col < allCaves[row].length; col++) {
@@ -685,7 +683,6 @@ function textInputEHandler(e: KeyboardEvent): void {
         return;
       }
       handleUserImg('clear');
-      console.log('enterCounter more than 1');
       movement(userTextInput.value);
     }
     enterCounter += 1;
